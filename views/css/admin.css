@@ -1,0 +1,41 @@
+/**
+ * ChatPuff live chat for PrestaShop
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License version 3.0
+ * that is bundled with this package in the file LICENSE.md.
+ * It is also available through the world-wide-web at this URL:
+ * https://opensource.org/licenses/AFL-3.0
+ *
+ * @author    ChatPuff <https://chatpuff.com>
+ * @copyright 2026 ChatPuff
+ * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
+ */
+.chatpuff-panel {
+  max-width: 760px;
+}
+
+.chatpuff-panel .panel-heading img {
+  vertical-align: text-bottom;
+  margin-right: 4px;
+}
+
+.chatpuff-details {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 16px;
+  margin: 0 0 16px;
+}
+
+.chatpuff-details dt {
+  font-weight: 600;
+}
+
+.chatpuff-details dd {
+  margin: 0;
+}
+
+.chatpuff-inline {
+  display: inline-block;
+}

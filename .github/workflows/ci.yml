@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # The module must run from PHP 7.4 (PrestaShop 1.7.8) up to PHP 8.5.
+  php-lint:
+    name: PHP syntax 7.4 to 8.5
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: prestashop/github-action-php-lint/7.4@master
+      - uses: prestashop/github-action-php-lint/8.0@master
+      - uses: prestashop/github-action-php-lint/8.1@master
+      - uses: prestashop/github-action-php-lint/8.2@master
+      - uses: prestashop/github-action-php-lint/8.3@master
+      - uses: prestashop/github-action-php-lint/8.4@master
+      - uses: prestashop/github-action-php-lint/8.5@master
+
+  php-cs-fixer:
+    name: PrestaShop coding standard
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          coverage: none
+      - run: composer install --no-interaction --no-progress
+      - run: vendor/bin/php-cs-fixer fix --dry-run --diff --using-cache=no
+
+  # PHPStan against real PrestaShop sources, at the PHP level of each run.
+  phpstan:
+    name: PHPStan (PrestaShop ${{ matrix.presta_version }}, PHP ${{ matrix.php_version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - presta_version: '8.2.x'
+            php_version: '7.4'
+            composer_version: '2.2.18'
+          - presta_version: '9.1.5'
+            php_version: '8.1'
+            composer_version: 'v2'
+          - presta_version: '9.1.5'
+            php_version: '8.5'
+            composer_version: 'v2'
+    env:
+      PHPRC: ${{ github.workspace }}/chatpuff/.phpstan-php-ini
+    steps:
+      # The action expects the checkout folder to carry the module name.
+      - uses: actions/checkout@v5
+        with:
+          path: chatpuff
+      - name: Define PrestaShop constants before its bootstrap
+        run: |
+          mkdir -p chatpuff/.phpstan-php-ini
+          {
+            echo "auto_prepend_file=$GITHUB_WORKSPACE/chatpuff/tests/phpstan/prepend-constants.php"
+            echo "memory_limit=1G"
+          } > chatpuff/.phpstan-php-ini/php.ini
+      - uses: PrestaShop/.github/.github/actions/php-ci/phpstan@master
+        with:
+          php-version: ${{ matrix.php_version }}
+          presta-version: ${{ matrix.presta_version }}
+          module-name: chatpuff
+          phpstan-config: tests/phpstan/phpstan.neon
+          composer-version: ${{ matrix.composer_version }}

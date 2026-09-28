@@ -1,0 +1,45 @@
+{
+    "name": "chatpuff/chatpuff-prestashop",
+    "description": "ChatPuff live chat for PrestaShop: connects a shop to ChatPuff.",
+    "type": "prestashop-module",
+    "license": "AFL-3.0",
+    "authors": [
+        {
+            "name": "ChatPuff",
+            "homepage": "https://chatpuff.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "paragonie/sodium_compat": "^1.21"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.64",
+        "phpstan/phpstan": "^2.1",
+        "prestashop/php-dev-tools": "^4.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "ChatPuff\\PrestaShop\\": "src/"
+        },
+        "classmap": [
+            "chatpuff.php",
+            "controllers/"
+        ]
+    },
+    "config": {
+        "platform": {
+            "php": "7.4.33"
+        },
+        "prepend-autoloader": false,
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "scripts": {
+        "cs": "php-cs-fixer fix --dry-run --diff",
+        "cs-fix": "php-cs-fixer fix",
+        "phpstan": "phpstan analyse --configuration=tests/phpstan/phpstan.neon"
+    }
+}

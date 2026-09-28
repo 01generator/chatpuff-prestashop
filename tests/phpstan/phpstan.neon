@@ -1,0 +1,5 @@
+# PHPStan for the module. CI (PrestaShop's reusable action) merges this with php-dev-tools'
+# ps-module-extension.neon and runs it against real PrestaShop sources, once per PHP version.
+parameters:
+  level: 5
+  reportUnmatchedIgnoredErrors: false

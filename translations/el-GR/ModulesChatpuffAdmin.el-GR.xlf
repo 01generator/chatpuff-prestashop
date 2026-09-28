@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="chatpuff" source-language="en-US" target-language="el-GR" datatype="plaintext">
+    <body>
+      <trans-unit id="1">
+        <source>ChatPuff live chat</source>
+        <target>ChatPuff ζωντανή συνομιλία</target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Live chat with your customers, answered from your back office, the ChatPuff dashboard or your phone.</source>
+        <target>Ζωντανή συνομιλία με τους πελάτες σας, με απαντήσεις από το back office, τον πίνακα ελέγχου του ChatPuff ή το κινητό σας.</target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Uninstalling disconnects your shops from ChatPuff. Their chat history stays in ChatPuff. Continue?</source>
+        <target>Η απεγκατάσταση αποσυνδέει τα καταστήματά σας από το ChatPuff. Το ιστορικό συνομιλιών τους παραμένει στο ChatPuff. Συνέχεια;</target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Your session expired. Please try again.</source>
+        <target>Η συνεδρία σας έληξε. Δοκιμάστε ξανά.</target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>ChatPuff could not be reached. Check that your server can make outgoing HTTPS connections, then try again.</source>
+        <target>Δεν ήταν δυνατή η επικοινωνία με το ChatPuff. Ελέγξτε ότι ο διακομιστής σας μπορεί να κάνει εξερχόμενες συνδέσεις HTTPS και δοκιμάστε ξανά.</target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Too many attempts. Please wait a few minutes and try again.</source>
+        <target>Πάρα πολλές προσπάθειες. Περιμένετε λίγα λεπτά και δοκιμάστε ξανά.</target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>ChatPuff could not complete the request (%code%). Error reference: %reference%</source>
+        <target>Το ChatPuff δεν μπόρεσε να ολοκληρώσει το αίτημα (%code%). Κωδικός αναφοράς σφάλματος: %reference%</target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>HTTPS is not enabled on this shop. ChatPuff needs HTTPS to check the shop when you connect it.</source>
+        <target>Το HTTPS δεν είναι ενεργοποιημένο σε αυτό το κατάστημα. Το ChatPuff χρειάζεται HTTPS για να ελέγξει το κατάστημα κατά τη σύνδεση.</target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Select a single shop at the top of the page. Each shop is connected to ChatPuff separately.</source>
+        <target>Επιλέξτε ένα μόνο κατάστημα στο πάνω μέρος της σελίδας. Κάθε κατάστημα συνδέεται ξεχωριστά με το ChatPuff.</target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>This shop is connected to ChatPuff.</source>
+        <target>Αυτό το κατάστημα είναι συνδεδεμένο με το ChatPuff.</target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Organization</source>
+        <target>Οργανισμός</target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Shop</source>
+        <target>Κατάστημα</target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Chat widget</source>
+        <target>Παράθυρο συνομιλίας</target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Published</source>
+        <target>Δημοσιευμένο</target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Not published yet: publish it from the ChatPuff dashboard when you are ready.</source>
+        <target>Δεν έχει δημοσιευτεί ακόμη: δημοσιεύστε το από τον πίνακα ελέγχου του ChatPuff όποτε θέλετε.</target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Open the ChatPuff dashboard</source>
+        <target>Άνοιγμα του πίνακα ελέγχου ChatPuff</target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Disconnect this shop from ChatPuff? Its chat history stays in ChatPuff.</source>
+        <target>Αποσύνδεση αυτού του καταστήματος από το ChatPuff; Το ιστορικό συνομιλιών του παραμένει στο ChatPuff.</target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Disconnect</source>
+        <target>Αποσύνδεση</target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>This shop's address (%current%) is not the one it was connected with (%connected%). It looks like a copy of your shop, such as a staging site, so the connection is paused here: a copy must never act for your live shop.</source>
+        <target>Η διεύθυνση αυτού του καταστήματος (%current%) δεν είναι αυτή με την οποία συνδέθηκε (%connected%). Φαίνεται να είναι αντίγραφο του καταστήματός σας, για παράδειγμα δοκιμαστικό site, γι' αυτό η σύνδεση είναι σε παύση εδώ: ένα αντίγραφο δεν πρέπει ποτέ να ενεργεί για το ζωντανό κατάστημά σας.</target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Disconnecting this copy leaves your live shop connected. You can then connect this copy as a separate shop.</source>
+        <target>Η αποσύνδεση αυτού του αντιγράφου αφήνει το ζωντανό κατάστημά σας συνδεδεμένο. Έπειτα μπορείτε να συνδέσετε το αντίγραφο ως ξεχωριστό κατάστημα.</target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Disconnect this copy</source>
+        <target>Αποσύνδεση αυτού του αντιγράφου</target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Confirm the connection in ChatPuff</source>
+        <target>Επιβεβαιώστε τη σύνδεση στο ChatPuff</target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Sign in to ChatPuff, or create a free account, and confirm this shop. This page updates by itself.</source>
+        <target>Συνδεθείτε στο ChatPuff ή δημιουργήστε δωρεάν λογαριασμό και επιβεβαιώστε αυτό το κατάστημα. Η σελίδα ενημερώνεται μόνη της.</target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Open ChatPuff to confirm</source>
+        <target>Άνοιγμα του ChatPuff για επιβεβαίωση</target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Waiting for your confirmation…</source>
+        <target>Αναμονή για την επιβεβαίωσή σας…</target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Start again</source>
+        <target>Έναρξη ξανά</target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>ChatPuff could not reach this shop to check it. Make sure the shop is online over HTTPS and not in maintenance mode, and that no firewall blocks ChatPuff. Then try again.</source>
+        <target>Το ChatPuff δεν μπόρεσε να επικοινωνήσει με αυτό το κατάστημα για να το ελέγξει. Βεβαιωθείτε ότι το κατάστημα λειτουργεί μέσω HTTPS, δεν είναι σε λειτουργία συντήρησης και ότι κανένα τείχος προστασίας δεν μπλοκάρει το ChatPuff. Έπειτα δοκιμάστε ξανά.</target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>This shop address is already connected to another ChatPuff account. Contact ChatPuff support to move it.</source>
+        <target>Η διεύθυνση αυτού του καταστήματος είναι ήδη συνδεδεμένη με άλλον λογαριασμό ChatPuff. Επικοινωνήστε με την υποστήριξη του ChatPuff για τη μεταφορά της.</target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>This PrestaShop is already connected to another ChatPuff organization. Contact ChatPuff support to move it.</source>
+        <target>Αυτό το PrestaShop είναι ήδη συνδεδεμένο με άλλον οργανισμό ChatPuff. Επικοινωνήστε με την υποστήριξη του ChatPuff για τη μεταφορά του.</target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>This shop was connected under another address. Contact ChatPuff support to change it.</source>
+        <target>Αυτό το κατάστημα συνδέθηκε με άλλη διεύθυνση. Επικοινωνήστε με την υποστήριξη του ChatPuff για να την αλλάξετε.</target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>The connection was cancelled in ChatPuff. You can start again at any time.</source>
+        <target>Η σύνδεση ακυρώθηκε στο ChatPuff. Μπορείτε να ξεκινήσετε ξανά οποιαδήποτε στιγμή.</target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>The shop was not connected.</source>
+        <target>Το κατάστημα δεν συνδέθηκε.</target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>The confirmation link expired before it was used. Please start again.</source>
+        <target>Ο σύνδεσμος επιβεβαίωσης έληξε πριν χρησιμοποιηθεί. Ξεκινήστε ξανά.</target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Connect this shop to ChatPuff</source>
+        <target>Συνδέστε αυτό το κατάστημα με το ChatPuff</target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Chat live with your customers from this back office, the ChatPuff dashboard or your phone. Connecting takes a minute: sign in to ChatPuff, or create a free account, and confirm the shop.</source>
+        <target>Συνομιλήστε ζωντανά με τους πελάτες σας από αυτό το back office, τον πίνακα ελέγχου του ChatPuff ή το κινητό σας. Η σύνδεση διαρκεί ένα λεπτό: συνδεθείτε στο ChatPuff ή δημιουργήστε δωρεάν λογαριασμό και επιβεβαιώστε το κατάστημα.</target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Shop address: %domain%</source>
+        <target>Διεύθυνση καταστήματος: %domain%</target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Connect to ChatPuff</source>
+        <target>Σύνδεση με το ChatPuff</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

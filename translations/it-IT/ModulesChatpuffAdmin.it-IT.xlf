@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="chatpuff" source-language="en-US" target-language="it-IT" datatype="plaintext">
+    <body>
+      <trans-unit id="1">
+        <source>ChatPuff live chat</source>
+        <target>ChatPuff chat dal vivo</target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Live chat with your customers, answered from your back office, the ChatPuff dashboard or your phone.</source>
+        <target>Chat dal vivo con la tua clientela, con risposte dal back office, dalla dashboard di ChatPuff o dal telefono.</target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Uninstalling disconnects your shops from ChatPuff. Their chat history stays in ChatPuff. Continue?</source>
+        <target>La disinstallazione scollega i tuoi negozi da ChatPuff. La cronologia delle chat resta in ChatPuff. Continuare?</target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Your session expired. Please try again.</source>
+        <target>La sessione è scaduta. Riprova.</target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>ChatPuff could not be reached. Check that your server can make outgoing HTTPS connections, then try again.</source>
+        <target>Impossibile raggiungere ChatPuff. Controlla che il server possa effettuare connessioni HTTPS in uscita, poi riprova.</target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Too many attempts. Please wait a few minutes and try again.</source>
+        <target>Troppi tentativi. Attendi qualche minuto e riprova.</target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>ChatPuff could not complete the request (%code%). Error reference: %reference%</source>
+        <target>ChatPuff non è riuscito a completare la richiesta (%code%). Riferimento dell'errore: %reference%</target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>HTTPS is not enabled on this shop. ChatPuff needs HTTPS to check the shop when you connect it.</source>
+        <target>HTTPS non è attivo su questo negozio. ChatPuff ha bisogno di HTTPS per verificare il negozio quando lo colleghi.</target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Select a single shop at the top of the page. Each shop is connected to ChatPuff separately.</source>
+        <target>Seleziona un solo negozio in alto nella pagina. Ogni negozio si collega a ChatPuff separatamente.</target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>This shop is connected to ChatPuff.</source>
+        <target>Questo negozio è collegato a ChatPuff.</target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Organization</source>
+        <target>Organizzazione</target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Shop</source>
+        <target>Negozio</target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Chat widget</source>
+        <target>Widget della chat</target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Published</source>
+        <target>Pubblicato</target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Not published yet: publish it from the ChatPuff dashboard when you are ready.</source>
+        <target>Non ancora pubblicato: pubblicalo dalla dashboard di ChatPuff quando vuoi.</target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Open the ChatPuff dashboard</source>
+        <target>Apri la dashboard di ChatPuff</target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Disconnect this shop from ChatPuff? Its chat history stays in ChatPuff.</source>
+        <target>Scollegare questo negozio da ChatPuff? La cronologia delle chat resta in ChatPuff.</target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Disconnect</source>
+        <target>Scollega</target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>This shop's address (%current%) is not the one it was connected with (%connected%). It looks like a copy of your shop, such as a staging site, so the connection is paused here: a copy must never act for your live shop.</source>
+        <target>L'indirizzo di questo negozio (%current%) non è quello con cui è stato collegato (%connected%). Sembra una copia del tuo negozio, ad esempio un sito di prova, quindi qui il collegamento è in pausa: una copia non deve mai agire per il tuo negozio online.</target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Disconnecting this copy leaves your live shop connected. You can then connect this copy as a separate shop.</source>
+        <target>Scollegando questa copia, il tuo negozio online resta collegato. Poi puoi collegare questa copia come negozio separato.</target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Disconnect this copy</source>
+        <target>Scollega questa copia</target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Confirm the connection in ChatPuff</source>
+        <target>Conferma il collegamento in ChatPuff</target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Sign in to ChatPuff, or create a free account, and confirm this shop. This page updates by itself.</source>
+        <target>Accedi a ChatPuff, o crea un account gratuito, e conferma questo negozio. Questa pagina si aggiorna da sola.</target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Open ChatPuff to confirm</source>
+        <target>Apri ChatPuff per confermare</target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Waiting for your confirmation…</source>
+        <target>In attesa della tua conferma…</target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Start again</source>
+        <target>Ricomincia</target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>ChatPuff could not reach this shop to check it. Make sure the shop is online over HTTPS and not in maintenance mode, and that no firewall blocks ChatPuff. Then try again.</source>
+        <target>ChatPuff non è riuscito a raggiungere questo negozio per verificarlo. Assicurati che il negozio sia online in HTTPS e non in modalità manutenzione, e che nessun firewall blocchi ChatPuff. Poi riprova.</target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>This shop address is already connected to another ChatPuff account. Contact ChatPuff support to move it.</source>
+        <target>L'indirizzo di questo negozio è già collegato a un altro account ChatPuff. Contatta l'assistenza ChatPuff per trasferirlo.</target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>This PrestaShop is already connected to another ChatPuff organization. Contact ChatPuff support to move it.</source>
+        <target>Questo PrestaShop è già collegato a un'altra organizzazione ChatPuff. Contatta l'assistenza ChatPuff per trasferirlo.</target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>This shop was connected under another address. Contact ChatPuff support to change it.</source>
+        <target>Questo negozio è stato collegato con un altro indirizzo. Contatta l'assistenza ChatPuff per cambiarlo.</target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>The connection was cancelled in ChatPuff. You can start again at any time.</source>
+        <target>Il collegamento è stato annullato in ChatPuff. Puoi ricominciare in qualsiasi momento.</target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>The shop was not connected.</source>
+        <target>Il negozio non è stato collegato.</target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>The confirmation link expired before it was used. Please start again.</source>
+        <target>Il link di conferma è scaduto prima di essere usato. Ricomincia.</target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Connect this shop to ChatPuff</source>
+        <target>Collega questo negozio a ChatPuff</target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Chat live with your customers from this back office, the ChatPuff dashboard or your phone. Connecting takes a minute: sign in to ChatPuff, or create a free account, and confirm the shop.</source>
+        <target>Chatta dal vivo con la tua clientela da questo back office, dalla dashboard di ChatPuff o dal telefono. Il collegamento richiede un minuto: accedi a ChatPuff, o crea un account gratuito, e conferma il negozio.</target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Shop address: %domain%</source>
+        <target>Indirizzo del negozio: %domain%</target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Connect to ChatPuff</source>
+        <target>Collega a ChatPuff</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
