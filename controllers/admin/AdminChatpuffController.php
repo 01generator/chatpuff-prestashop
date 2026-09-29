@@ -20,11 +20,13 @@ if (!defined('_PS_VERSION_')) {
 
 use ChatPuff\PrestaShop\ApiClient;
 use ChatPuff\PrestaShop\ApiException;
+use ChatPuff\PrestaShop\BackOfficeInbox;
 use ChatPuff\PrestaShop\Pairing;
 use ChatPuff\PrestaShop\Settings;
 
 /**
- * Customer Service > ChatPuff: connects this shop to ChatPuff and shows the connection.
+ * Customer Service > ChatPuff: connects this shop to ChatPuff, and once it is connected, shows the
+ * ChatPuff inbox to employees who linked their ChatPuff account.
  *
  * @property Chatpuff $module
  */
@@ -45,8 +47,9 @@ class AdminChatpuffController extends ModuleAdminController
     public function setMedia($isNewTheme = false): void
     {
         parent::setMedia($isNewTheme);
-        $this->addCSS($this->module->getPathUri() . 'views/css/admin.css');
-        $this->addJS($this->module->getPathUri() . 'views/js/admin.js');
+        // The version makes browsers fetch the files again after an upgrade.
+        $this->addCSS($this->module->getPathUri() . 'views/css/admin.css?v=' . ApiClient::MODULE_VERSION);
+        $this->addJS($this->module->getPathUri() . 'views/js/admin.js?v=' . ApiClient::MODULE_VERSION);
     }
 
     public function postProcess()
@@ -112,6 +115,49 @@ class AdminChatpuffController extends ModuleAdminController
         exit;
     }
 
+    /**
+     * A staff token for the inbox (api-contract.md §7.3), asked for by views/js/admin.js when the page
+     * opens and before the token expires. PrestaShop has already checked that the employee may open
+     * this tab.
+     */
+    public function ajaxProcessStaffToken(): void
+    {
+        $this->renderJson(function (int $idShop): array {
+            return $this->backOfficeInbox()->token($idShop, (int) $this->context->employee->id);
+        });
+    }
+
+    /**
+     * The link that opens in a ChatPuff window, where the employee signs in and confirms.
+     */
+    public function ajaxProcessEmployeeLink(): void
+    {
+        $this->renderJson(function (int $idShop): array {
+            return ['state' => 'linking', 'link_url' => $this->backOfficeInbox()->linkUrl($idShop, $this->context->employee)];
+        });
+    }
+
+    /**
+     * @param Closure(int): array<string, string> $action
+     */
+    private function renderJson(Closure $action): void
+    {
+        $idShop = $this->currentShopId();
+        $result = ['state' => 'error', 'error' => $this->trans('Your session expired. Please try again.', [], 'Modules.Chatpuff.Admin')];
+        if ($idShop !== null && $this->checkToken() && $this->access('view')) {
+            try {
+                $result = $action($idShop);
+            } catch (ApiException $exception) {
+                $result = ['state' => 'error', 'error' => $this->apiError($exception)];
+            }
+        }
+
+        header('Cache-Control: no-store');
+        header('Content-Type: application/json; charset=utf-8');
+        $this->ajaxRender((string) json_encode($result));
+        exit;
+    }
+
     private function renderConnection(): string
     {
         $idShop = $this->currentShopId();
@@ -136,7 +182,15 @@ class AdminChatpuffController extends ModuleAdminController
                 $view['connected_domain'] = $connection['domain'];
             } elseif ($connection !== null) {
                 $view['state'] = 'connected';
-                $view['dashboard_url'] = $connection['dashboard_url'] ?? 'https://app.chatpuff.com';
+                $view['inbox'] = [
+                    'token_url' => $this->context->link->getAdminLink('AdminChatpuff') . '&ajax=1&action=staffToken',
+                    'link_url' => $this->context->link->getAdminLink('AdminChatpuff') . '&ajax=1&action=employeeLink',
+                    'api' => (new ApiClient())->baseUrl(),
+                    'locale' => (string) $this->context->language->iso_code,
+                ];
+                // The shop's setup page in ChatPuff, where the owner publishes the chat widget.
+                $view['dashboard_url'] = rtrim((string) ($connection['dashboard_url'] ?? 'https://app.chatpuff.com'), '/')
+                    . (is_string($connection['shop_id'] ?? null) && $connection['shop_id'] !== '' ? '/shops/' . rawurlencode($connection['shop_id']) : '');
                 try {
                     $view['status'] = $pairing->connectionStatus($idShop);
                 } catch (ApiException $exception) {
@@ -170,6 +224,11 @@ class AdminChatpuffController extends ModuleAdminController
     private function pairing(): Pairing
     {
         return new Pairing(new ApiClient(), $this->context->link);
+    }
+
+    private function backOfficeInbox(): BackOfficeInbox
+    {
+        return new BackOfficeInbox($this->pairing());
     }
 
     private function apiError(ApiException $exception): string

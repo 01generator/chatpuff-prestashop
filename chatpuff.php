@@ -22,8 +22,10 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 use ChatPuff\PrestaShop\ApiClient;
 use ChatPuff\PrestaShop\ApiException;
+use ChatPuff\PrestaShop\CustomerToken;
 use ChatPuff\PrestaShop\Pairing;
 use ChatPuff\PrestaShop\Settings;
+use ChatPuff\PrestaShop\ShopDomain;
 
 class Chatpuff extends Module
 {
@@ -61,12 +63,67 @@ class Chatpuff extends Module
 
     public function install(): bool
     {
-        if (!parent::install()) {
+        if (!parent::install() || !$this->registerHook('displayBeforeBodyClosingTag')) {
             return false;
         }
         Settings::installationId();
 
         return true;
+    }
+
+    /**
+     * Adds the chat widget's script to every storefront page of a connected shop (api-contract.md
+     * §7.1). ChatPuff shows the chat only once the owner publishes it, and the script loads async,
+     * so it never slows the page down or breaks it.
+     */
+    public function hookDisplayBeforeBodyClosingTag(): string
+    {
+        $shop = $this->context->shop;
+        $widget = Settings::widget((int) $shop->id);
+        if ($widget === null) {
+            return '';
+        }
+        // A copy of a connected shop, such as a staging site, must not show the live shop's chat.
+        if (ShopDomain::normalize($shop->getBaseURL(true)) !== $widget['domain']) {
+            return '';
+        }
+
+        return sprintf(
+            '<script async src="%s" data-shop="%s" data-locale="%s"%s></script>',
+            htmlspecialchars((new ApiClient())->baseUrl() . '/widget/v1/loader.js', ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars($widget['shop_id'], ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars((string) $this->context->language->iso_code, ENT_QUOTES, 'UTF-8'),
+            $this->customerTokenAttribute((int) $shop->id)
+        );
+    }
+
+    /**
+     * A logged-in customer skips the chat's name and email form: the page carries a token, signed
+     * with this shop's connection key, that says who they are (api-contract.md §7.2). Guest
+     * checkout accounts are not logged in and get no token.
+     */
+    private function customerTokenAttribute(int $idShop): string
+    {
+        $customer = $this->context->customer;
+        if (!Validate::isLoadedObject($customer) || !$customer->isLogged()) {
+            return '';
+        }
+        $connection = Settings::connection($idShop);
+        if ($connection === null) {
+            return '';
+        }
+
+        $token = CustomerToken::create(
+            $connection,
+            Settings::installationId(),
+            (string) $idShop,
+            (string) $customer->id,
+            trim($customer->firstname . ' ' . $customer->lastname),
+            (string) $customer->email,
+            time()
+        );
+
+        return ' data-customer-token="' . htmlspecialchars($token, ENT_QUOTES, 'UTF-8') . '"';
     }
 
     public function uninstall(): bool

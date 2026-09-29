@@ -150,6 +150,50 @@
         <source>Connect to ChatPuff</source>
         <target>Σύνδεση με το ChatPuff</target>
       </trans-unit>
+      <trans-unit id="38">
+        <source>ChatPuff inbox</source>
+        <target>Εισερχόμενα ChatPuff</target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Your browser blocked the ChatPuff window. Allow pop-ups for this back office and try again.</source>
+        <target>Ο φυλλομετρητής σας μπλόκαρε το παράθυρο του ChatPuff. Επιτρέψτε τα αναδυόμενα παράθυρα για αυτό το back office και δοκιμάστε ξανά.</target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>The ChatPuff inbox could not be loaded. Check your internet connection and reload the page.</source>
+        <target>Δεν ήταν δυνατή η φόρτωση των εισερχομένων του ChatPuff. Ελέγξτε τη σύνδεσή σας στο διαδίκτυο και ανανεώστε τη σελίδα.</target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Loading the inbox…</source>
+        <target>Φόρτωση των εισερχομένων…</target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Link your ChatPuff account</source>
+        <target>Συνδέστε τον λογαριασμό σας ChatPuff</target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>To answer chats here, link your back-office account to your ChatPuff account once. A ChatPuff window opens where you sign in and confirm.</source>
+        <target>Για να απαντάτε σε συνομιλίες εδώ, συνδέστε μία φορά τον λογαριασμό σας στο back office με τον λογαριασμό σας ChatPuff. Ανοίγει ένα παράθυρο του ChatPuff όπου συνδέεστε και επιβεβαιώνετε.</target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Link my ChatPuff account</source>
+        <target>Σύνδεση του λογαριασμού μου ChatPuff</target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Waiting for you to confirm in the ChatPuff window…</source>
+        <target>Αναμονή για την επιβεβαίωσή σας στο παράθυρο του ChatPuff…</target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Your ChatPuff account has no access to this shop's chats. Ask an owner or admin of your ChatPuff organization to give you access, or link another account.</source>
+        <target>Ο λογαριασμός σας ChatPuff δεν έχει πρόσβαση στις συνομιλίες αυτού του καταστήματος. Ζητήστε από έναν κάτοχο ή διαχειριστή του οργανισμού σας στο ChatPuff να σας δώσει πρόσβαση ή συνδέστε άλλον λογαριασμό.</target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Link another account</source>
+        <target>Σύνδεση άλλου λογαριασμού</target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>The inbox needs JavaScript.</source>
+        <target>Τα εισερχόμενα χρειάζονται JavaScript.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

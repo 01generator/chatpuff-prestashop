@@ -16,13 +16,18 @@ This module connects a shop to ChatPuff. It is deliberately thin: the chat widge
 2. Click **Connect to ChatPuff**. A ChatPuff page opens: sign in, or create a free account, and confirm the shop.
 3. ChatPuff checks that the request really comes from your shop's domain, and the back office shows the shop as connected.
 
-In a multistore, connect each shop separately. The chat widget stays hidden until you publish it from the ChatPuff dashboard.
+In a multistore, connect each shop separately. The chat widget stays hidden until you publish it from the ChatPuff dashboard. Customers who are logged in to your shop are recognised by the chat and do not type their name and email.
+
+## Answering chats in the back office
+
+**Customer Service > ChatPuff** shows the ChatPuff inbox once the shop is connected. Each employee links their back-office account to their own ChatPuff account once: click **Link my ChatPuff account**, sign in to ChatPuff in the window that opens, and confirm. The employee must be a member of the shop's ChatPuff organization with access to the shop; an owner or admin grants it in ChatPuff. Employees who may open the ChatPuff tab in PrestaShop see the inbox; what they may do in it is decided by their role in ChatPuff.
 
 ### Security
 
 - The module creates its own Ed25519 key pair on your server. The private key never leaves the shop and is stored encrypted with your shop's cookie key; ChatPuff only receives the public key.
 - Every call to ChatPuff is signed and can be sent only once. ChatPuff proves domain ownership by asking the module to sign a challenge on your shop's own address.
 - A copy of a connected shop (for example a staging site on another address) does not use the live shop's connection. The module shows a warning and lets you disconnect the copy or connect it as a separate shop.
+- Back-office access to the inbox uses short-lived tokens that ChatPuff checks on every request, and that reach only the shops connected from this PrestaShop. Matching email addresses never link accounts: the employee signs in to ChatPuff once to link them.
 - Uninstalling disconnects the shops from ChatPuff. Their chat history stays in ChatPuff; your ChatPuff plan does not change.
 
 ## Development

@@ -27,7 +27,7 @@ if (!defined('_PS_VERSION_')) {
  */
 final class ApiClient
 {
-    public const MODULE_VERSION = '0.1.0';
+    public const MODULE_VERSION = '0.4.0';
     public const API_CONTRACT_VERSION = '1';
     public const PAIRING_KEY_ID = 'pairing';
 
@@ -42,6 +42,14 @@ final class ApiClient
         // Developers point the module at a local ChatPuff with _CHATPUFF_API_URL_ in
         // config/defines_custom.inc.php; shops always use the production address.
         $this->baseUrl = rtrim($baseUrl ?? (defined('_CHATPUFF_API_URL_') ? (string) constant('_CHATPUFF_API_URL_') : 'https://api.chatpuff.com'), '/');
+    }
+
+    /**
+     * ChatPuff's API address, which also serves the storefront widget's scripts.
+     */
+    public function baseUrl(): string
+    {
+        return $this->baseUrl;
     }
 
     /**

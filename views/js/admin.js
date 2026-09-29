@@ -68,6 +68,162 @@
         }
       });
     });
+
+    var backoffice = document.querySelector('[data-chatpuff-backoffice]');
+    if (backoffice && window.fetch && window.Promise) {
+      initInbox(backoffice);
+    }
+  }
+
+  /**
+   * The ChatPuff inbox (api-contract.md §7.3). The module gives this page 15-minute staff tokens for
+   * the signed-in employee; ChatPuff's inbox script draws the inbox and asks for a new token when
+   * one expires. An employee who has not linked their ChatPuff account yet links it once, in a
+   * ChatPuff window.
+   */
+  function initInbox(host) {
+    var api = host.getAttribute('data-api');
+    var current = null;
+    var pending = null;
+    var mounted = false;
+    var popup = null;
+    var popupTimer = null;
+    var linkOrigin = null;
+
+    function show(state, error) {
+      host.querySelectorAll('[data-chatpuff-when]').forEach(function (node) {
+        node.hidden = node.getAttribute('data-chatpuff-when') !== state;
+      });
+      if (state === 'error') {
+        host.querySelector('[data-chatpuff-when="error"]').textContent = error || host.getAttribute('data-failed');
+      }
+    }
+
+    function post(url) {
+      return fetch(url, { method: 'POST', credentials: 'same-origin', headers: { Accept: 'application/json' } })
+        .then(function (response) { return response.json(); });
+    }
+
+    // The current token, or a new one from the module when asked to renew or close to expiry.
+    function token(renew) {
+      if (!renew && current && current.renewAt > Date.now()) {
+        return Promise.resolve(current.token);
+      }
+      if (!pending) {
+        pending = post(host.getAttribute('data-token-url')).then(function (data) {
+          pending = null;
+          if (data.state !== 'ready' || !data.access_token) {
+            current = null;
+            // The link was replaced or access removed: say so. Other failures leave a running inbox
+            // alone; it retries by itself.
+            if (data.state === 'not_linked' || data.state === 'no_access') {
+              show(data.state);
+            } else if (!mounted) {
+              show('error', data.error);
+            }
+            throw new Error(data.state || 'error');
+          }
+          // The browser's clock may differ from ChatPuff's: count from now, a minute early.
+          var lifetime = Date.parse(String(data.expires_at).replace(/(\.\d{3})\d+/, '$1')) - Date.now();
+          if (!(lifetime > 120000 && lifetime <= 900000)) {
+            lifetime = 600000;
+          }
+          current = { token: data.access_token, shopId: data.shop_id, renewAt: Date.now() + lifetime - 60000 };
+
+          return current.token;
+        }, function (error) {
+          pending = null;
+          if (!mounted) {
+            show('error');
+          }
+          throw error;
+        });
+      }
+
+      return pending;
+    }
+
+    function mount() {
+      show('ready');
+      if (mounted) {
+        return;
+      }
+      mounted = true;
+      var script = document.createElement('script');
+      script.async = true;
+      script.src = api + '/backoffice/v1/inbox.js';
+      script.onload = function () {
+        window.ChatPuffInbox.mount(host.querySelector('[data-chatpuff-when="ready"]'), {
+          api: api,
+          locale: host.getAttribute('data-locale'),
+          shopId: current ? current.shopId : null,
+          auth: { mode: 'bearer', token: token }
+        });
+      };
+      script.onerror = function () {
+        mounted = false;
+        show('error');
+      };
+      document.head.appendChild(script);
+    }
+
+    function start() {
+      show('loading');
+      token(true).then(mount, function () {});
+    }
+
+    // After linking, or when the ChatPuff window closes without it: ask again. A page whose inbox
+    // already ran for another account starts over.
+    function afterLinking() {
+      window.clearInterval(popupTimer);
+      if (mounted) {
+        window.location.reload();
+      } else {
+        start();
+      }
+    }
+
+    host.querySelectorAll('[data-chatpuff-link]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        // Opened during the click so that pop-up blockers allow it.
+        popup = window.open('', 'chatpuff-link', 'popup,width=520,height=760');
+        if (!popup) {
+          show('error', host.getAttribute('data-popup-blocked'));
+          return;
+        }
+        show('linking');
+        post(host.getAttribute('data-link-url')).then(function (data) {
+          if (!data.link_url) {
+            popup.close();
+            show('error', data.error);
+            return;
+          }
+          linkOrigin = new URL(data.link_url).origin;
+          popup.location.href = data.link_url;
+          window.clearInterval(popupTimer);
+          popupTimer = window.setInterval(function () {
+            if (popup.closed) {
+              afterLinking();
+            }
+          }, 1000);
+        }).catch(function () {
+          popup.close();
+          show('error');
+        });
+      });
+    });
+
+    // ChatPuff's page says when the link is made, so the inbox opens without waiting.
+    window.addEventListener('message', function (event) {
+      if (linkOrigin !== null && event.origin === linkOrigin && event.data && event.data.type === 'chatpuff:employee-linked') {
+        if (popup && !popup.closed) {
+          popup.close();
+        }
+        afterLinking();
+      }
+    });
+
+    start();
   }
 
   // The back office loads module scripts in the page head, before the forms exist.

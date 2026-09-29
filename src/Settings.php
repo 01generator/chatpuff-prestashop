@@ -76,6 +76,22 @@ final class Settings
     }
 
     /**
+     * What the storefront needs on every page: the ChatPuff shop ID and the domain the shop was
+     * connected with. Unlike connection(), it does not decrypt the private key.
+     *
+     * @return array{shop_id: string, domain: string}|null
+     */
+    public static function widget(int $idShop): ?array
+    {
+        $data = self::read(self::CONNECTION, $idShop);
+        if ($data === null || !is_string($data['shop_id'] ?? null) || $data['shop_id'] === '' || !is_string($data['domain'] ?? null)) {
+            return null;
+        }
+
+        return ['shop_id' => $data['shop_id'], 'domain' => $data['domain']];
+    }
+
+    /**
      * @param array<string, mixed> $connection with the private key in plain text
      */
     public static function saveConnection(int $idShop, array $connection): void

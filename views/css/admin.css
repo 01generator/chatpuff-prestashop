@@ -39,3 +39,18 @@
 .chatpuff-inline {
   display: inline-block;
 }
+
+.chatpuff-inbox-panel .panel-heading img {
+  vertical-align: text-bottom;
+  margin-right: 4px;
+}
+
+.chatpuff-backoffice [hidden] {
+  display: none !important;
+}
+
+/* The inbox draws itself inside this box, in its own shadow root. */
+.chatpuff-inbox {
+  height: calc(100vh - 300px);
+  min-height: 520px;
+}

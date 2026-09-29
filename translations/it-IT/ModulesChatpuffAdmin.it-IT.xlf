@@ -150,6 +150,50 @@
         <source>Connect to ChatPuff</source>
         <target>Collega a ChatPuff</target>
       </trans-unit>
+      <trans-unit id="38">
+        <source>ChatPuff inbox</source>
+        <target>Posta in arrivo ChatPuff</target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Your browser blocked the ChatPuff window. Allow pop-ups for this back office and try again.</source>
+        <target>Il browser ha bloccato la finestra di ChatPuff. Consenti i pop-up per questo back office e riprova.</target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>The ChatPuff inbox could not be loaded. Check your internet connection and reload the page.</source>
+        <target>Non è stato possibile caricare la posta in arrivo di ChatPuff. Controlla la connessione a internet e ricarica la pagina.</target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Loading the inbox…</source>
+        <target>Caricamento della posta in arrivo…</target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Link your ChatPuff account</source>
+        <target>Collega il tuo account ChatPuff</target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>To answer chats here, link your back-office account to your ChatPuff account once. A ChatPuff window opens where you sign in and confirm.</source>
+        <target>Per rispondere alle chat qui, collega una volta il tuo account del back office al tuo account ChatPuff. Si apre una finestra di ChatPuff in cui accedi e confermi.</target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Link my ChatPuff account</source>
+        <target>Collega il mio account ChatPuff</target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Waiting for you to confirm in the ChatPuff window…</source>
+        <target>In attesa della tua conferma nella finestra di ChatPuff…</target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Your ChatPuff account has no access to this shop's chats. Ask an owner or admin of your ChatPuff organization to give you access, or link another account.</source>
+        <target>Il tuo account ChatPuff non ha accesso alle chat di questo negozio. Chiedi a un proprietario o amministratore della tua organizzazione in ChatPuff di darti accesso, oppure collega un altro account.</target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Link another account</source>
+        <target>Collega un altro account</target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>The inbox needs JavaScript.</source>
+        <target>La posta in arrivo richiede JavaScript.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

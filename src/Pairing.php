@@ -151,17 +151,7 @@ final class Pairing
      */
     public function connectionStatus(int $idShop): array
     {
-        $connection = $this->usableConnection($idShop);
-        try {
-            return $this->api->send('GET', '/integration/v1/connection', null, (string) $connection['key_id'], (string) $connection['secret_key']);
-        } catch (ApiException $exception) {
-            if (in_array($exception->getProblemCode(), ['connection_revoked', 'unknown_key'], true)) {
-                // Disconnected on the ChatPuff side: forget the key here too.
-                Settings::clearConnection($idShop);
-            }
-
-            throw $exception;
-        }
+        return $this->send($idShop, 'GET', '/integration/v1/connection');
     }
 
     /**
@@ -173,6 +163,30 @@ final class Pairing
     {
         $connection = $this->usableConnection($idShop);
         $this->api->send('PUT', '/integration/v1/installation', ['metadata' => self::metadata()], (string) $connection['key_id'], (string) $connection['secret_key']);
+    }
+
+    /**
+     * A signed Integration API call for a connected shop, never from a copy of it.
+     *
+     * @param array<string, mixed>|null $body
+     *
+     * @return array<string, mixed>
+     *
+     * @throws ApiException
+     */
+    public function send(int $idShop, string $method, string $path, ?array $body = null): array
+    {
+        $connection = $this->usableConnection($idShop);
+        try {
+            return $this->api->send($method, $path, $body, (string) $connection['key_id'], (string) $connection['secret_key']);
+        } catch (ApiException $exception) {
+            if (in_array($exception->getProblemCode(), ['connection_revoked', 'unknown_key'], true)) {
+                // Disconnected on the ChatPuff side: forget the key here too.
+                Settings::clearConnection($idShop);
+            }
+
+            throw $exception;
+        }
     }
 
     /**
@@ -236,8 +250,8 @@ final class Pairing
             'php_version' => PHP_VERSION,
             'integration_version' => ApiClient::MODULE_VERSION,
             'api_contract_version' => ApiClient::API_CONTRACT_VERSION,
-            // Added as the features ship: customer_identity (logged-in customers), back_office_inbox.
-            'capabilities' => [],
+            // Added as the features ship.
+            'capabilities' => ['customer_identity', 'back_office_inbox'],
         ];
     }
 
