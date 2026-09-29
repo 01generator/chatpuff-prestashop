@@ -61,21 +61,26 @@ final class ApiClient
      */
     public function send(string $method, string $path, ?array $body, string $keyId, string $secretKey): array
     {
-        for ($attempt = 1;; ++$attempt) {
+        $response = $this->exchange($method, $path, $body, $keyId, $secretKey);
+
+        // A wrong server clock: correct it from ChatPuff's Date header and try once more.
+        if ($response['status'] === 401 && self::problemCode($response) === 'timestamp_out_of_range' && $response['date'] !== null) {
+            $this->clockOffset = $response['date'] - time();
             $response = $this->exchange($method, $path, $body, $keyId, $secretKey);
-            $code = is_string($response['body']['code'] ?? null) ? $response['body']['code'] : 'http_' . $response['status'];
-
-            // A wrong server clock: correct it from ChatPuff's Date header and try once more.
-            if ($attempt === 1 && $response['status'] === 401 && $code === 'timestamp_out_of_range' && $response['date'] !== null) {
-                $this->clockOffset = $response['date'] - time();
-                continue;
-            }
-            if ($response['status'] >= 200 && $response['status'] < 300) {
-                return $response['body'];
-            }
-
-            throw new ApiException($code, $response['status'], is_string($response['body']['reference'] ?? null) ? $response['body']['reference'] : '');
         }
+        if ($response['status'] >= 200 && $response['status'] < 300) {
+            return $response['body'];
+        }
+
+        throw new ApiException(self::problemCode($response), $response['status'], is_string($response['body']['reference'] ?? null) ? $response['body']['reference'] : '');
+    }
+
+    /**
+     * @param array{status: int, body: array<string, mixed>, date: int|null} $response
+     */
+    private static function problemCode(array $response): string
+    {
+        return is_string($response['body']['code'] ?? null) ? $response['body']['code'] : 'http_' . $response['status'];
     }
 
     public static function signingString(string $method, string $pathAndQuery, string $timestamp, string $nonce, string $body): string

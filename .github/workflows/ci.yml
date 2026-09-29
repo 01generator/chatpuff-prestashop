@@ -42,7 +42,9 @@ jobs:
       - run: composer install --no-interaction --no-progress
       - run: vendor/bin/php-cs-fixer fix --dry-run --diff --using-cache=no
 
-  # PHPStan against real PrestaShop sources, at the PHP level of each run.
+  # PHPStan against real PrestaShop sources, at the PHP level of each run. The action uses the
+  # PHPStan version of each PrestaShop, and 9.1.5's accepts PHP levels up to 8.4; PHP 8.5 is
+  # covered by the syntax job above.
   phpstan:
     name: PHPStan (PrestaShop ${{ matrix.presta_version }}, PHP ${{ matrix.php_version }})
     runs-on: ubuntu-latest
@@ -58,7 +60,7 @@ jobs:
             php_version: '8.1'
             composer_version: 'v2'
           - presta_version: '9.1.5'
-            php_version: '8.5'
+            php_version: '8.4'
             composer_version: 'v2'
     env:
       PHPRC: ${{ github.workspace }}/chatpuff/.phpstan-php-ini
