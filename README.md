@@ -34,6 +34,29 @@ The module reports its version and your PrestaShop and PHP versions to ChatPuff 
 - Back-office access to the inbox uses short-lived tokens that ChatPuff checks on every request, and that reach only the shops connected from this PrestaShop. Matching email addresses never link accounts: the employee signs in to ChatPuff once to link them.
 - Uninstalling disconnects the shops from ChatPuff. Their chat history stays in ChatPuff; your ChatPuff plan does not change.
 
+## Troubleshooting
+
+**"ChatPuff could not reach this shop to check it."** When you connect, ChatPuff calls `/module/chatpuff/callback` on your shop's own address to prove that the shop is yours. Something in front of the shop answered instead of the module:
+
+- **Cloudflare.** Its bot protection answers with a challenge page (HTTP 403 or 503). Add a custom rule (Security > WAF > Custom rules, or Security rules in the newer dashboard) with the expression below and the action **Skip**. Tick "All remaining custom rules", and under the other components "Security Level" and "Browser Integrity Check". Place it first, save it, and connect again.
+
+  ```
+  (http.request.uri.path contains "/module/chatpuff/callback")
+  ```
+
+  Bot Fight Mode cannot be skipped by a rule: switch it off while you connect.
+- **A password on the shop (common on staging copies), or another firewall.** Let requests to that address through while you connect.
+
+Maintenance mode and country restrictions do not block the check: from version 0.5.1 the callback answers ChatPuff while the shop is closed to visitors.
+
+The callback reveals nothing: it only answers while a connection is being confirmed, and only by signing ChatPuff's random challenge.
+
+To test it from any server, call the address that the module's page shows after a failed connection (it may carry a language, such as `/el/`) with `?action=verify&challenge=test`. It should answer HTTP 400 with `{"code":"invalid_challenge"}`:
+
+```bash
+curl -i 'https://your-shop.example/el/module/chatpuff/callback?action=verify&challenge=test'
+```
+
 ## Development
 
 ```bash

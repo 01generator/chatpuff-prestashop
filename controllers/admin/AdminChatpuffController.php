@@ -240,6 +240,8 @@ class AdminChatpuffController extends ModuleAdminController
                 $result = $pairing->poll($idShop);
                 $view['state'] = $result['state'] === 'connected' ? 'just_connected' : $result['state'];
                 $view['rejection'] = $result['code'] ?? '';
+                // The address ChatPuff calls to check the domain, for the help shown when that check fails.
+                $view['callback_url'] = $this->context->link->getModuleLink('chatpuff', 'callback', [], true, null, $idShop);
                 $view['confirmation_url'] = $request['confirmation_url'] ?? '';
             } else {
                 $view['state'] = 'not_connected';

@@ -214,6 +214,22 @@
         <source>Choose one of this shop's pages.</source>
         <target>Choisissez l'une des pages de cette boutique.</target>
       </trans-unit>
+      <trans-unit id="54">
+        <source>ChatPuff checks the shop by calling this address:</source>
+        <target>ChatPuff vérifie la boutique en appelant cette adresse :</target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Behind Cloudflare, the bot protection often blocks this check. In Cloudflare, add a custom rule (Security &gt; WAF &gt; Custom rules, or Security rules in the newer dashboard) with this expression:</source>
+        <target>Derrière Cloudflare, la protection contre les bots bloque souvent cette vérification. Dans Cloudflare, ajoutez une règle personnalisée (Security &gt; WAF &gt; Custom rules, ou Security rules dans le tableau de bord plus récent) avec cette expression :</target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Choose the action Skip. Tick "All remaining custom rules", and under the other components "Security Level" and "Browser Integrity Check". Place the rule first, save it, then connect again.</source>
+        <target>Choisissez l'action Skip. Cochez « All remaining custom rules » et, parmi les autres composants, « Security Level » et « Browser Integrity Check ». Placez la règle en premier, enregistrez-la, puis connectez de nouveau.</target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Cloudflare's Bot Fight Mode cannot be skipped by a rule: switch it off while you connect. With another firewall, or a password on the shop, let requests to this address through.</source>
+        <target>Le Bot Fight Mode de Cloudflare ne peut pas être contourné par une règle : désactivez-le le temps de la connexion. Avec un autre pare-feu ou un mot de passe sur la boutique, laissez passer les requêtes vers cette adresse.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -36,6 +36,21 @@ class ChatpuffCallbackModuleFrontController extends ModuleFrontController
         parent::init();
     }
 
+    /**
+     * ChatPuff's servers must reach this endpoint while the shop is in maintenance mode, as a new
+     * or test shop often is: parent::init() would answer them with the 503 maintenance page.
+     */
+    protected function displayMaintenancePage(): void
+    {
+    }
+
+    /**
+     * Nor may the shop's country restrictions (geolocation) turn ChatPuff's servers away.
+     */
+    protected function displayRestrictedCountryPage(): void
+    {
+    }
+
     public function displayAjaxVerify(): void
     {
         header('Content-Type: application/json');

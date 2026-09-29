@@ -69,3 +69,17 @@
   gap: 8px;
   max-width: 480px;
 }
+
+.chatpuff-help {
+  margin: 0 0 20px;
+}
+
+.chatpuff-help code {
+  word-break: break-all;
+}
+
+.chatpuff-rule {
+  white-space: pre-wrap;
+  user-select: all;
+  margin: 0 0 10px;
+}

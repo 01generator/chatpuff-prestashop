@@ -214,6 +214,22 @@
         <source>Choose one of this shop's pages.</source>
         <target>Επιλέξτε μία από τις σελίδες αυτού του καταστήματος.</target>
       </trans-unit>
+      <trans-unit id="54">
+        <source>ChatPuff checks the shop by calling this address:</source>
+        <target>Το ChatPuff ελέγχει το κατάστημα καλώντας αυτή τη διεύθυνση:</target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Behind Cloudflare, the bot protection often blocks this check. In Cloudflare, add a custom rule (Security &gt; WAF &gt; Custom rules, or Security rules in the newer dashboard) with this expression:</source>
+        <target>Πίσω από το Cloudflare, η προστασία από bots συχνά μπλοκάρει αυτόν τον έλεγχο. Στο Cloudflare, προσθέστε έναν προσαρμοσμένο κανόνα (Security &gt; WAF &gt; Custom rules, ή Security rules στο νεότερο dashboard) με αυτή την έκφραση:</target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Choose the action Skip. Tick "All remaining custom rules", and under the other components "Security Level" and "Browser Integrity Check". Place the rule first, save it, then connect again.</source>
+        <target>Επιλέξτε την ενέργεια Skip. Τσεκάρετε το «All remaining custom rules» και, στα υπόλοιπα στοιχεία, τα «Security Level» και «Browser Integrity Check». Βάλτε τον κανόνα πρώτο, αποθηκεύστε τον και συνδέστε ξανά.</target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Cloudflare's Bot Fight Mode cannot be skipped by a rule: switch it off while you connect. With another firewall, or a password on the shop, let requests to this address through.</source>
+        <target>Το Bot Fight Mode του Cloudflare δεν παρακάμπτεται με κανόνα: απενεργοποιήστε το όσο συνδέετε. Με άλλο τείχος προστασίας ή κωδικό πρόσβασης στο κατάστημα, αφήστε να περνούν τα αιτήματα προς αυτή τη διεύθυνση.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

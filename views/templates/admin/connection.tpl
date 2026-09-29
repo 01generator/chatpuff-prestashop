@@ -134,6 +134,15 @@
           {l s='The shop was not connected.' d='Modules.Chatpuff.Admin'}
         {/if}
       </div>
+      {if $chatpuff.rejection == 'domain_verification_failed'}
+        <div class="chatpuff-help">
+          <p>{l s='ChatPuff checks the shop by calling this address:' d='Modules.Chatpuff.Admin'}<br><code>{$chatpuff.callback_url|escape:'html':'UTF-8'}</code></p>
+          <p>{l s='Behind Cloudflare, the bot protection often blocks this check. In Cloudflare, add a custom rule (Security > WAF > Custom rules, or Security rules in the newer dashboard) with this expression:' d='Modules.Chatpuff.Admin'}</p>
+          <pre class="chatpuff-rule">(http.request.uri.path contains "/module/chatpuff/callback")</pre>
+          <p>{l s='Choose the action Skip. Tick "All remaining custom rules", and under the other components "Security Level" and "Browser Integrity Check". Place the rule first, save it, then connect again.' d='Modules.Chatpuff.Admin'}</p>
+          <p>{l s='Cloudflare\'s Bot Fight Mode cannot be skipped by a rule: switch it off while you connect. With another firewall, or a password on the shop, let requests to this address through.' d='Modules.Chatpuff.Admin'}</p>
+        </div>
+      {/if}
     {elseif $chatpuff.state == 'expired'}
       <div class="alert alert-warning">{l s='The confirmation link expired before it was used. Please start again.' d='Modules.Chatpuff.Admin'}</div>
     {/if}
