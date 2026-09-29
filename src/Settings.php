@@ -30,6 +30,11 @@ final class Settings
     public const INSTALLATION_ID = 'CHATPUFF_INSTALLATION_ID';
     public const CONNECTION = 'CHATPUFF_CONNECTION';
     public const PAIRING = 'CHATPUFF_PAIRING';
+    public const REPORTED_AT = 'CHATPUFF_REPORTED_AT';
+    public const PRIVACY_CMS = 'CHATPUFF_PRIVACY_CMS';
+
+    /** The installation report doubles as the connection's heartbeat: at most once an hour (api-contract.md §7). */
+    public const REPORT_INTERVAL = 3600;
 
     public static function installationId(): string
     {
@@ -137,9 +142,37 @@ final class Settings
         self::write(self::PAIRING, $idShop, null);
     }
 
+    /**
+     * Whether this shop's hourly report is due. Claiming it at once keeps the other visitors of the
+     * same moment from sending it too.
+     */
+    public static function claimReport(int $idShop, int $now): bool
+    {
+        $last = (int) \Configuration::get(self::REPORTED_AT, null, null, $idShop);
+        if ($now - $last < self::REPORT_INTERVAL) {
+            return false;
+        }
+        \Configuration::updateValue(self::REPORTED_AT, $now, false, (int) \Shop::getGroupFromShop($idShop, true), $idShop);
+
+        return true;
+    }
+
+    /**
+     * The CMS page the chat links to where it asks for a name and email (api-contract.md §7.1), or 0.
+     */
+    public static function privacyPage(int $idShop): int
+    {
+        return (int) \Configuration::get(self::PRIVACY_CMS, null, null, $idShop);
+    }
+
+    public static function savePrivacyPage(int $idShop, int $idCms): void
+    {
+        \Configuration::updateValue(self::PRIVACY_CMS, $idCms, false, (int) \Shop::getGroupFromShop($idShop, true), $idShop);
+    }
+
     public static function deleteAll(): void
     {
-        foreach ([self::INSTALLATION_ID, self::CONNECTION, self::PAIRING] as $key) {
+        foreach ([self::INSTALLATION_ID, self::CONNECTION, self::PAIRING, self::REPORTED_AT, self::PRIVACY_CMS] as $key) {
             \Configuration::deleteByName($key);
         }
     }

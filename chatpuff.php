@@ -88,13 +88,68 @@ class Chatpuff extends Module
             return '';
         }
 
+        $this->reportAfterResponse((int) $shop->id);
+
         return sprintf(
-            '<script async src="%s" data-shop="%s" data-locale="%s"%s></script>',
+            '<script async src="%s" data-shop="%s" data-locale="%s"%s%s></script>',
             htmlspecialchars((new ApiClient())->baseUrl() . '/widget/v1/loader.js', ENT_QUOTES, 'UTF-8'),
             htmlspecialchars($widget['shop_id'], ENT_QUOTES, 'UTF-8'),
             htmlspecialchars((string) $this->context->language->iso_code, ENT_QUOTES, 'UTF-8'),
+            $this->privacyAttribute((int) $shop->id),
             $this->customerTokenAttribute((int) $shop->id)
         );
+    }
+
+    /**
+     * The shop's privacy page, which the chat links from its notice about the name and email it asks
+     * for. Chosen on the module's page; nothing when none is chosen or the page is disabled.
+     */
+    private function privacyAttribute(int $idShop): string
+    {
+        $idCms = Settings::privacyPage($idShop);
+        if ($idCms <= 0) {
+            return '';
+        }
+        $idLang = (int) $this->context->language->id;
+        $cms = new CMS($idCms, $idLang, $idShop);
+        if (!Validate::isLoadedObject($cms) || !$cms->active) {
+            return '';
+        }
+
+        return ' data-privacy-url="' . htmlspecialchars($this->context->link->getCMSLink($cms, null, true, $idLang, $idShop), ENT_QUOTES, 'UTF-8') . '"';
+    }
+
+    /**
+     * The hourly installation report, which is also the connection's heartbeat (api-contract.md §7).
+     * It is sent after the page has reached the visitor, so ChatPuff being slow or unreachable never
+     * delays the storefront. Servers that cannot finish a response early send it from the module's
+     * back-office page instead.
+     */
+    private function reportAfterResponse(int $idShop): void
+    {
+        if (function_exists('fastcgi_finish_request')) {
+            $finish = static function (): void {
+                fastcgi_finish_request();
+            };
+        } elseif (function_exists('litespeed_finish_request')) {
+            $finish = static function (): void {
+                litespeed_finish_request();
+            };
+        } else {
+            return;
+        }
+        if (!Settings::claimReport($idShop, time())) {
+            return;
+        }
+        $link = $this->context->link;
+        register_shutdown_function(static function () use ($finish, $idShop, $link): void {
+            $finish();
+            try {
+                (new Pairing(new ApiClient(), $link))->reportInstallation($idShop);
+            } catch (Exception $exception) {
+                // The next report is due in an hour; the chat works either way.
+            }
+        });
     }
 
     /**

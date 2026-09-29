@@ -55,13 +55,16 @@ class AdminChatpuffController extends ModuleAdminController
     public function postProcess()
     {
         $idShop = $this->currentShopId();
-        if ($idShop === null || !(Tools::isSubmit('chatpuffConnect') || Tools::isSubmit('chatpuffDisconnect') || Tools::isSubmit('chatpuffForgetCopy'))) {
+        if ($idShop === null || !(Tools::isSubmit('chatpuffConnect') || Tools::isSubmit('chatpuffDisconnect') || Tools::isSubmit('chatpuffForgetCopy') || Tools::isSubmit('chatpuffPrivacy'))) {
             return parent::postProcess();
         }
         if (!$this->checkToken()) {
             $this->errors[] = $this->trans('Your session expired. Please try again.', [], 'Modules.Chatpuff.Admin');
 
             return false;
+        }
+        if (Tools::isSubmit('chatpuffPrivacy')) {
+            return $this->savePrivacyPage($idShop);
         }
 
         $pairing = $this->pairing();
@@ -82,6 +85,36 @@ class AdminChatpuffController extends ModuleAdminController
         Tools::redirectAdmin($this->context->link->getAdminLink('AdminChatpuff'));
 
         return true;
+    }
+
+    /**
+     * The privacy page the chat links to (api-contract.md §7.1): one of this shop's CMS pages, or none.
+     */
+    private function savePrivacyPage(int $idShop): bool
+    {
+        $idCms = (int) Tools::getValue('chatpuff_privacy_cms');
+        if ($idCms !== 0 && !in_array($idCms, array_column($this->cmsPages($idShop), 'id_cms'), true)) {
+            $this->errors[] = $this->trans('Choose one of this shop\'s pages.', [], 'Modules.Chatpuff.Admin');
+
+            return false;
+        }
+        Settings::savePrivacyPage($idShop, $idCms);
+        Tools::redirectAdmin($this->context->link->getAdminLink('AdminChatpuff') . '&conf=4');
+
+        return true;
+    }
+
+    /**
+     * @return list<array{id_cms: int, title: string}> the shop's active CMS pages, in the employee's language
+     */
+    private function cmsPages(int $idShop): array
+    {
+        $pages = [];
+        foreach (CMS::getCMSPages((int) $this->context->language->id, null, true, $idShop) as $page) {
+            $pages[] = ['id_cms' => (int) $page['id_cms'], 'title' => (string) $page['meta_title']];
+        }
+
+        return $pages;
     }
 
     /**
@@ -191,8 +224,14 @@ class AdminChatpuffController extends ModuleAdminController
                 // The shop's setup page in ChatPuff, where the owner publishes the chat widget.
                 $view['dashboard_url'] = rtrim((string) ($connection['dashboard_url'] ?? 'https://app.chatpuff.com'), '/')
                     . (is_string($connection['shop_id'] ?? null) && $connection['shop_id'] !== '' ? '/shops/' . rawurlencode($connection['shop_id']) : '');
+                $view['privacy'] = ['pages' => $this->cmsPages($idShop), 'selected' => Settings::privacyPage($idShop)];
                 try {
                     $view['status'] = $pairing->connectionStatus($idShop);
+                    // The hourly report, for servers where the storefront cannot send it after the
+                    // response (chatpuff.php); it waits for nobody here, the page already calls ChatPuff.
+                    if (Settings::claimReport($idShop, time())) {
+                        $pairing->reportInstallation($idShop);
+                    }
                 } catch (ApiException $exception) {
                     $view['state'] = $pairing->isConnected($idShop) ? 'connected' : 'not_connected';
                     $view['error'] = $this->apiError($exception);

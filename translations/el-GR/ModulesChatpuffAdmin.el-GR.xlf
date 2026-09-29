@@ -194,6 +194,26 @@
         <source>The inbox needs JavaScript.</source>
         <target>Τα εισερχόμενα χρειάζονται JavaScript.</target>
       </trans-unit>
+      <trans-unit id="49">
+        <source>Privacy policy page</source>
+        <target>Σελίδα πολιτικής απορρήτου</target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>None</source>
+        <target>Καμία</target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Save</source>
+        <target>Αποθήκευση</target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>The chat links to this page where it asks customers for their name and email.</source>
+        <target>Η συνομιλία παραπέμπει σε αυτή τη σελίδα εκεί όπου ζητά από τους πελάτες το όνομα και το email τους.</target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Choose one of this shop's pages.</source>
+        <target>Επιλέξτε μία από τις σελίδες αυτού του καταστήματος.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

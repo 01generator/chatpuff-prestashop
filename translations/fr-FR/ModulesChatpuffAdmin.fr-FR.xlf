@@ -194,6 +194,26 @@
         <source>The inbox needs JavaScript.</source>
         <target>La boîte de réception nécessite JavaScript.</target>
       </trans-unit>
+      <trans-unit id="49">
+        <source>Privacy policy page</source>
+        <target>Page de politique de confidentialité</target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>None</source>
+        <target>Aucune</target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Save</source>
+        <target>Enregistrer</target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>The chat links to this page where it asks customers for their name and email.</source>
+        <target>Le chat renvoie vers cette page là où il demande aux clients leur nom et leur email.</target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Choose one of this shop's pages.</source>
+        <target>Choisissez l'une des pages de cette boutique.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -76,6 +76,21 @@
     <p>
       <a href="{$chatpuff.dashboard_url|escape:'html':'UTF-8'}" target="_blank" rel="noopener" class="btn btn-primary">{l s='Open the ChatPuff dashboard' d='Modules.Chatpuff.Admin'}</a>
     </p>
+    {if isset($chatpuff.privacy)}
+      <form method="post" action="{$chatpuff.admin_url|escape:'html':'UTF-8'}" class="chatpuff-privacy">
+        <label for="chatpuff-privacy-cms">{l s='Privacy policy page' d='Modules.Chatpuff.Admin'}</label>
+        <div class="chatpuff-privacy-row">
+          <select id="chatpuff-privacy-cms" name="chatpuff_privacy_cms" class="form-control">
+            <option value="0">{l s='None' d='Modules.Chatpuff.Admin'}</option>
+            {foreach $chatpuff.privacy.pages as $page}
+              <option value="{$page.id_cms|intval}"{if $page.id_cms == $chatpuff.privacy.selected} selected{/if}>{$page.title|escape:'html':'UTF-8'}</option>
+            {/foreach}
+          </select>
+          <button type="submit" name="chatpuffPrivacy" value="1" class="btn btn-default">{l s='Save' d='Modules.Chatpuff.Admin'}</button>
+        </div>
+        <p class="help-block">{l s='The chat links to this page where it asks customers for their name and email.' d='Modules.Chatpuff.Admin'}</p>
+      </form>
+    {/if}
     <form method="post" action="{$chatpuff.admin_url|escape:'html':'UTF-8'}" class="chatpuff-inline" data-chatpuff-confirm="{l s='Disconnect this shop from ChatPuff? Its chat history stays in ChatPuff.' d='Modules.Chatpuff.Admin'}">
       <button type="submit" name="chatpuffDisconnect" value="1" class="btn btn-default">{l s='Disconnect' d='Modules.Chatpuff.Admin'}</button>
     </form>

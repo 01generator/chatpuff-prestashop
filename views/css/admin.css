@@ -54,3 +54,18 @@
   height: calc(100vh - 300px);
   min-height: 520px;
 }
+
+.chatpuff-privacy {
+  margin: 0 0 20px;
+}
+
+.chatpuff-privacy label {
+  display: block;
+  font-weight: 600;
+}
+
+.chatpuff-privacy-row {
+  display: flex;
+  gap: 8px;
+  max-width: 480px;
+}

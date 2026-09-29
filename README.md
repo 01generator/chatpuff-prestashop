@@ -18,6 +18,10 @@ This module connects a shop to ChatPuff. It is deliberately thin: the chat widge
 
 In a multistore, connect each shop separately. The chat widget stays hidden until you publish it from the ChatPuff dashboard. Customers who are logged in to your shop are recognised by the chat and do not type their name and email.
 
+Choose your **privacy policy page** on the same screen, once the shop is connected. The chat links to it where it asks guests for their name and email.
+
+The module reports its version and your PrestaShop and PHP versions to ChatPuff once an hour, after a storefront page has been sent to the visitor, so it never slows a page down. On servers without PHP-FPM or LiteSpeed it reports when the ChatPuff page of the back office is opened.
+
 ## Answering chats in the back office
 
 **Customer Service > ChatPuff** shows the ChatPuff inbox once the shop is connected. Each employee links their back-office account to their own ChatPuff account once: click **Link my ChatPuff account**, sign in to ChatPuff in the window that opens, and confirm. The employee must be a member of the shop's ChatPuff organization with access to the shop; an owner or admin grants it in ChatPuff. Employees who may open the ChatPuff tab in PrestaShop see the inbox; what they may do in it is decided by their role in ChatPuff.
@@ -45,6 +49,13 @@ define('_CHATPUFF_API_URL_', 'http://localhost:8080');
 ```
 
 CI checks PHP syntax from 7.4 to 8.5, the coding standard, and PHPStan against PrestaShop 8.2 and 9.1.
+
+## Releases
+
+1. Set the new version in `MODULE_VERSION` (`src/ApiClient.php`) and add `upgrade/upgrade-X.Y.Z.php`.
+2. Push a tag `vX.Y.Z` with the same version.
+
+The **Release** workflow builds `chatpuff-X.Y.Z.zip` (the files shops install, without development files, with the runtime dependencies) and publishes it as a GitHub release. Running the workflow by hand builds the zip as a download for testing, without a release.
 
 ## License
 

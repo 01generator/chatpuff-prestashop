@@ -1,0 +1,80 @@
+name: Release
+
+# Builds the zip that shops install: the tracked files without development files (see the
+# export-ignore rules in .gitattributes), plus the runtime dependencies only. A tag such as v0.5.0
+# publishes it as a GitHub release; a manual run only keeps it as a workflow artifact, for testing.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  zip:
+    name: Build the module zip
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          coverage: none
+          tools: composer:v2
+
+      - name: Read the module version
+        run: |
+          version="$(sed -n "s/.*MODULE_VERSION = '\([0-9][0-9.]*\)';.*/\1/p" src/ApiClient.php)"
+          if [ -z "$version" ]; then
+            echo "::error::MODULE_VERSION not found in src/ApiClient.php"
+            exit 1
+          fi
+          if [ "$GITHUB_REF_TYPE" = "tag" ] && [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "::error::The tag $GITHUB_REF_NAME does not match the module version $version"
+            exit 1
+          fi
+          if [ ! -f "upgrade/upgrade-$version.php" ] && [ "$version" != "0.1.0" ]; then
+            echo "::warning::No upgrade/upgrade-$version.php: shops that update run no upgrade step"
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: Export the shipped files
+        run: |
+          mkdir -p build
+          git archive --format=tar --prefix=chatpuff/ HEAD | tar -x -C build
+
+      - name: Install the runtime dependencies only
+        working-directory: build/chatpuff
+        run: composer install --no-dev --no-interaction --no-progress --optimize-autoloader
+
+      # PrestaShop's module validator wants an index.php in every folder, vendor/ included. The tool
+      # comes from the development dependencies, which stay outside the zip.
+      - name: Add index.php files to the dependencies
+        run: |
+          composer install --no-interaction --no-progress
+          vendor/bin/autoindex prestashop:add:index build/chatpuff/vendor
+
+      - name: Check the shipped PHP files with PHP 7.4
+        run: find build/chatpuff -name '*.php' -not -path 'build/chatpuff/vendor/*' -print0 | xargs -0 -n 1 -P 4 php -l > /dev/null
+
+      - name: Zip
+        working-directory: build
+        run: |
+          zip -q -r -9 "chatpuff-$VERSION.zip" chatpuff
+          unzip -l "chatpuff-$VERSION.zip" | tail -n 1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chatpuff-${{ env.VERSION }}
+          path: build/chatpuff-${{ env.VERSION }}.zip
+          retention-days: 30
+
+      - name: Publish the release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" "build/chatpuff-$VERSION.zip" --title "ChatPuff for PrestaShop $VERSION" --generate-notes
