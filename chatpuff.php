@@ -26,9 +26,22 @@ use ChatPuff\PrestaShop\CustomerToken;
 use ChatPuff\PrestaShop\Pairing;
 use ChatPuff\PrestaShop\Settings;
 use ChatPuff\PrestaShop\ShopDomain;
+use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
-class Chatpuff extends Module
+class Chatpuff extends Module implements WidgetInterface
 {
+    /**
+     * Where the chat's script goes, first come first served: the theme's closing-tag hook, the
+     * displayChatPuff hook for themes and page builders that leave that one out, and, failing both,
+     * the finished page itself.
+     */
+    public const STOREFRONT_HOOKS = ['displayBeforeBodyClosingTag', 'displayChatPuff', 'actionOutputHTMLBefore'];
+
+    /**
+     * @var bool whether this page already has the chat's script
+     */
+    private static $widgetAdded = false;
+
     public function __construct()
     {
         $this->name = 'chatpuff';
@@ -63,7 +76,7 @@ class Chatpuff extends Module
 
     public function install(): bool
     {
-        if (!parent::install() || !$this->registerHook('displayBeforeBodyClosingTag')) {
+        if (!parent::install() || !$this->registerHook(self::STOREFRONT_HOOKS)) {
             return false;
         }
         Settings::installationId();
@@ -71,13 +84,66 @@ class Chatpuff extends Module
         return true;
     }
 
-    /**
-     * Adds the chat widget's script to every storefront page of a connected shop (api-contract.md
-     * §7.1). ChatPuff shows the chat only once the owner publishes it, and the script loads async,
-     * so it never slows the page down or breaks it.
-     */
     public function hookDisplayBeforeBodyClosingTag(): string
     {
+        return $this->widgetTag();
+    }
+
+    /**
+     * {widget name='chatpuff'} in a template, the displayChatPuff hook, or any other display hook
+     * the module is transplanted to (Design > Positions). The chat always floats in a corner of the
+     * page, wherever its script is.
+     *
+     * @param string $hookName
+     * @param array<string, mixed> $configuration
+     */
+    public function renderWidget($hookName, array $configuration): string
+    {
+        return $this->widgetTag();
+    }
+
+    /**
+     * @param string $hookName
+     * @param array<string, mixed> $configuration
+     *
+     * @return array<string, mixed>
+     */
+    public function getWidgetVariables($hookName, array $configuration): array
+    {
+        return [];
+    }
+
+    /**
+     * Some themes and page builders (Elementor layouts among them) never call a hook that could
+     * carry the script: it then goes in just before </body> of the finished page. Not on the
+     * maintenance (503) or restricted-country (403) pages.
+     *
+     * @param array<string, mixed> $params 'html': the page, by reference
+     */
+    public function hookActionOutputHTMLBefore(array $params): void
+    {
+        if (self::$widgetAdded || !isset($params['html']) || !is_string($params['html']) || in_array(http_response_code(), [403, 503], true)) {
+            return;
+        }
+        $tag = $this->widgetTag();
+        if ($tag === '') {
+            return;
+        }
+        $position = strripos($params['html'], '</body>');
+        $params['html'] = $position === false ? $params['html'] . $tag : substr_replace($params['html'], $tag, $position, 0);
+    }
+
+    /**
+     * The chat widget's script for a storefront page of a connected shop (api-contract.md §7.1),
+     * once per page. ChatPuff shows the chat only once the owner publishes it, and the script loads
+     * async, so it never slows the page down or breaks it. Cloudflare's Rocket Loader leaves it
+     * alone (data-cfasync).
+     */
+    private function widgetTag(): string
+    {
+        if (self::$widgetAdded) {
+            return '';
+        }
         $shop = $this->context->shop;
         $widget = Settings::widget((int) $shop->id);
         if ($widget === null) {
@@ -88,10 +154,11 @@ class Chatpuff extends Module
             return '';
         }
 
+        self::$widgetAdded = true;
         $this->reportAfterResponse((int) $shop->id);
 
         return sprintf(
-            '<script async src="%s" data-shop="%s" data-locale="%s"%s%s></script>',
+            '<script async data-cfasync="false" src="%s" data-shop="%s" data-locale="%s"%s%s></script>',
             htmlspecialchars((new ApiClient())->baseUrl() . '/widget/v1/loader.js', ENT_QUOTES, 'UTF-8'),
             htmlspecialchars($widget['shop_id'], ENT_QUOTES, 'UTF-8'),
             htmlspecialchars((string) $this->context->language->iso_code, ENT_QUOTES, 'UTF-8'),

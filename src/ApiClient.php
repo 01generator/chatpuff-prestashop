@@ -27,7 +27,7 @@ if (!defined('_PS_VERSION_')) {
  */
 final class ApiClient
 {
-    public const MODULE_VERSION = '0.5.1';
+    public const MODULE_VERSION = '0.6.0';
     public const API_CONTRACT_VERSION = '1';
     public const PAIRING_KEY_ID = 'pairing';
 

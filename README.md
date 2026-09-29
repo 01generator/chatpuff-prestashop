@@ -22,6 +22,21 @@ Choose your **privacy policy page** on the same screen, once the shop is connect
 
 The module reports its version and your PrestaShop and PHP versions to ChatPuff once an hour, after a storefront page has been sent to the visitor, so it never slows a page down. On servers without PHP-FPM or LiteSpeed it reports when the ChatPuff page of the back office is opened.
 
+## The chat on your storefront
+
+The chat is a button that floats in a corner of every storefront page. The module adds its script (it loads async, so it never slows a page down) in the first of these places, and only once per page:
+
+1. the `displayBeforeBodyClosingTag` hook, which PrestaShop's themes call at the end of every page;
+2. the `displayChatPuff` hook, or `{widget name='chatpuff'}`, for themes and page builders (Elementor layouts among them) that leave that hook out: put either in your theme's template, or attach ChatPuff to another hook in **Design > Positions**;
+3. otherwise, just before `</body>` of the finished page, so the chat appears even when no hook carries it.
+
+Where the script lands does not move the button. The chat is not added to the maintenance page.
+
+The chat does not appear when:
+- it is not published yet: the module's page says so, and an owner or admin publishes it from the shop's page in ChatPuff;
+- a page cache module serves pages saved before ChatPuff was installed: clear its cache;
+- the shop's address is not the one it was connected with (a copy of the shop, such as a staging site).
+
 ## Answering chats in the back office
 
 **Customer Service > ChatPuff** shows the ChatPuff inbox once the shop is connected. Each employee links their back-office account to their own ChatPuff account once: click **Link my ChatPuff account**, sign in to ChatPuff in the window that opens, and confirm. The employee must be a member of the shop's ChatPuff organization with access to the shop; an owner or admin grants it in ChatPuff. Employees who may open the ChatPuff tab in PrestaShop see the inbox; what they may do in it is decided by their role in ChatPuff.
