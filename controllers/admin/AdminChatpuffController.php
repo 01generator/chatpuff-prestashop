@@ -21,6 +21,7 @@ if (!defined('_PS_VERSION_')) {
 use ChatPuff\PrestaShop\ApiClient;
 use ChatPuff\PrestaShop\ApiException;
 use ChatPuff\PrestaShop\BackOfficeInbox;
+use ChatPuff\PrestaShop\Knowledge;
 use ChatPuff\PrestaShop\Pairing;
 use ChatPuff\PrestaShop\Settings;
 
@@ -55,7 +56,7 @@ class AdminChatpuffController extends ModuleAdminController
     public function postProcess()
     {
         $idShop = $this->currentShopId();
-        if ($idShop === null || !(Tools::isSubmit('chatpuffConnect') || Tools::isSubmit('chatpuffDisconnect') || Tools::isSubmit('chatpuffForgetCopy') || Tools::isSubmit('chatpuffPrivacy'))) {
+        if ($idShop === null || !(Tools::isSubmit('chatpuffConnect') || Tools::isSubmit('chatpuffDisconnect') || Tools::isSubmit('chatpuffForgetCopy') || Tools::isSubmit('chatpuffPrivacy') || Tools::isSubmit('chatpuffSyncKnowledge'))) {
             return parent::postProcess();
         }
         if (!$this->checkToken()) {
@@ -65,6 +66,9 @@ class AdminChatpuffController extends ModuleAdminController
         }
         if (Tools::isSubmit('chatpuffPrivacy')) {
             return $this->savePrivacyPage($idShop);
+        }
+        if (Tools::isSubmit('chatpuffSyncKnowledge')) {
+            return $this->syncKnowledge($idShop);
         }
 
         $pairing = $this->pairing();
@@ -83,6 +87,30 @@ class AdminChatpuffController extends ModuleAdminController
         }
 
         Tools::redirectAdmin($this->context->link->getAdminLink('AdminChatpuff'));
+
+        return true;
+    }
+
+    /**
+     * A run of the knowledge synchronization now, with a larger budget than a storefront visit gives
+     * it (api-contract.md §7.6); the page then shows where the pass stands.
+     */
+    private function syncKnowledge(int $idShop): bool
+    {
+        @set_time_limit(Knowledge::ADMIN_BUDGET + 30);
+        $started = microtime(true);
+        $before = Knowledge::cursor($idShop);
+        $cursor = (new Knowledge(new ApiClient(), $this->context->link))->run($idShop, Knowledge::ADMIN_BUDGET);
+        if ($cursor['error'] !== null) {
+            $this->errors[] = $this->trans('The synchronization stopped with the error %code%. It is retried automatically.', ['%code%' => $cursor['error']], 'Modules.Chatpuff.Admin');
+
+            return false;
+        }
+        $this->confirmations[] = $this->trans('Synchronized for %seconds% seconds: %checked% items checked, %sent% sent to ChatPuff.', [
+            '%seconds%' => (string) (int) round(microtime(true) - $started),
+            '%checked%' => (string) max(0, $cursor['checked'] - ($cursor['started_at'] === $before['started_at'] ? $before['checked'] : 0)),
+            '%sent%' => (string) max(0, $cursor['sent'] - ($cursor['started_at'] === $before['started_at'] ? $before['sent'] : 0)),
+        ], 'Modules.Chatpuff.Admin');
 
         return true;
     }
@@ -232,6 +260,17 @@ class AdminChatpuffController extends ModuleAdminController
                     if (Settings::claimReport($idShop, time())) {
                         $pairing->reportInstallation($idShop);
                     }
+                    // The same for the knowledge, a few seconds at a time.
+                    if (!function_exists('fastcgi_finish_request') && !function_exists('litespeed_finish_request') && Knowledge::claim($idShop, time())) {
+                        (new Knowledge(new ApiClient(), $this->context->link))->run($idShop, Knowledge::PAGE_BUDGET);
+                    }
+                    $cursor = Knowledge::cursor($idShop);
+                    $view['knowledge'] = [
+                        'in_progress' => $cursor['kind'] !== null,
+                        // Date only: PrestaShop 1.7 and 9 disagree on the other parameters of displayDate().
+                        'completed_at' => $cursor['completed_at'] === null ? null : Tools::displayDate(date('Y-m-d H:i:s', $cursor['completed_at'])),
+                        'error' => $cursor['error'],
+                    ];
                 } catch (ApiException $exception) {
                     $view['state'] = $pairing->isConnected($idShop) ? 'connected' : 'not_connected';
                     $view['error'] = $this->apiError($exception);

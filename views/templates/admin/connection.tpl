@@ -91,6 +91,28 @@
         <p class="help-block">{l s='The chat links to this page where it asks customers for their name and email.' d='Modules.Chatpuff.Admin'}</p>
       </form>
     {/if}
+    {if isset($chatpuff.knowledge)}
+      <div class="chatpuff-knowledge">
+        <h4>{l s='Knowledge for the AI assistant' d='Modules.Chatpuff.Admin'}</h4>
+        <p class="help-block">{l s='The module sends this shop\'s published products, categories and pages to ChatPuff every hour, so the assistant can answer from them. Choose what it may use on the ChatPuff dashboard; nothing about customers is sent.' d='Modules.Chatpuff.Admin'}</p>
+        <p>
+          {if $chatpuff.knowledge.completed_at}
+            {l s='Last complete synchronization: %date%.' sprintf=['%date%' => $chatpuff.knowledge.completed_at] d='Modules.Chatpuff.Admin'}
+          {else}
+            {l s='Not synchronized yet.' d='Modules.Chatpuff.Admin'}
+          {/if}
+          {if $chatpuff.knowledge.in_progress}
+            {l s='A synchronization is in progress and continues with every visit to the shop.' d='Modules.Chatpuff.Admin'}
+          {/if}
+          {if $chatpuff.knowledge.error}
+            <span class="text-danger">{l s='The last attempt failed (%code%); it is retried automatically.' sprintf=['%code%' => $chatpuff.knowledge.error] d='Modules.Chatpuff.Admin'}</span>
+          {/if}
+        </p>
+        <form method="post" action="{$chatpuff.admin_url|escape:'html':'UTF-8'}" class="chatpuff-inline">
+          <button type="submit" name="chatpuffSyncKnowledge" value="1" class="btn btn-default">{l s='Synchronize now' d='Modules.Chatpuff.Admin'}</button>
+        </form>
+      </div>
+    {/if}
     <form method="post" action="{$chatpuff.admin_url|escape:'html':'UTF-8'}" class="chatpuff-inline" data-chatpuff-confirm="{l s='Disconnect this shop from ChatPuff? Its chat history stays in ChatPuff.' d='Modules.Chatpuff.Admin'}">
       <button type="submit" name="chatpuffDisconnect" value="1" class="btn btn-default">{l s='Disconnect' d='Modules.Chatpuff.Admin'}</button>
     </form>

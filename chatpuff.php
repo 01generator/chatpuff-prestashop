@@ -23,6 +23,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 use ChatPuff\PrestaShop\ApiClient;
 use ChatPuff\PrestaShop\ApiException;
 use ChatPuff\PrestaShop\CustomerToken;
+use ChatPuff\PrestaShop\Knowledge;
 use ChatPuff\PrestaShop\Pairing;
 use ChatPuff\PrestaShop\Settings;
 use ChatPuff\PrestaShop\ShopDomain;
@@ -76,7 +77,7 @@ class Chatpuff extends Module implements WidgetInterface
 
     public function install(): bool
     {
-        if (!parent::install() || !$this->registerHook(self::STOREFRONT_HOOKS)) {
+        if (!parent::install() || !$this->registerHook(self::STOREFRONT_HOOKS) || !Knowledge::installTable()) {
             return false;
         }
         Settings::installationId();
@@ -205,14 +206,23 @@ class Chatpuff extends Module implements WidgetInterface
         } else {
             return;
         }
-        if (!Settings::claimReport($idShop, time())) {
+        $now = time();
+        $report = Settings::claimReport($idShop, $now);
+        // The assistant's knowledge (api-contract.md §7.6): a slice of the shop's content per run, within a budget.
+        $knowledge = Knowledge::claim($idShop, $now);
+        if (!$report && !$knowledge) {
             return;
         }
         $link = $this->context->link;
-        register_shutdown_function(static function () use ($finish, $idShop, $link): void {
+        register_shutdown_function(static function () use ($finish, $idShop, $link, $report, $knowledge): void {
             $finish();
             try {
-                (new Pairing(new ApiClient(), $link))->reportInstallation($idShop);
+                if ($report) {
+                    (new Pairing(new ApiClient(), $link))->reportInstallation($idShop);
+                }
+                if ($knowledge) {
+                    (new Knowledge(new ApiClient(), $link))->run($idShop, Knowledge::STOREFRONT_BUDGET);
+                }
             } catch (Exception $exception) {
                 // The next report is due in an hour; the chat works either way.
             }
@@ -260,6 +270,7 @@ class Chatpuff extends Module implements WidgetInterface
             }
         }
         Settings::deleteAll();
+        Knowledge::dropTable();
 
         return parent::uninstall();
     }

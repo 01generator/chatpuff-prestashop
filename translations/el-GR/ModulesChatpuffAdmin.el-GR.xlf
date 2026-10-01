@@ -230,6 +230,42 @@
         <source>Cloudflare's Bot Fight Mode cannot be skipped by a rule: switch it off while you connect. With another firewall, or a password on the shop, let requests to this address through.</source>
         <target>Το Bot Fight Mode του Cloudflare δεν παρακάμπτεται με κανόνα: απενεργοποιήστε το όσο συνδέετε. Με άλλο τείχος προστασίας ή κωδικό πρόσβασης στο κατάστημα, αφήστε να περνούν τα αιτήματα προς αυτή τη διεύθυνση.</target>
       </trans-unit>
+      <trans-unit id="58">
+        <source>Knowledge for the AI assistant</source>
+        <target>Γνώση για τον βοηθό AI</target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>The module sends this shop's published products, categories and pages to ChatPuff every hour, so the assistant can answer from them. Choose what it may use on the ChatPuff dashboard; nothing about customers is sent.</source>
+        <target>Το module στέλνει στο ChatPuff κάθε ώρα τα δημοσιευμένα προϊόντα, τις κατηγορίες και τις σελίδες αυτού του καταστήματος, ώστε ο βοηθός να απαντά από αυτά. Επιλέξτε τι μπορεί να χρησιμοποιεί στο dashboard του ChatPuff· τίποτα για τους πελάτες δεν αποστέλλεται.</target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Last complete synchronization: %date%.</source>
+        <target>Τελευταίος πλήρης συγχρονισμός: %date%.</target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Not synchronized yet.</source>
+        <target>Δεν έχει συγχρονιστεί ακόμη.</target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>A synchronization is in progress and continues with every visit to the shop.</source>
+        <target>Ένας συγχρονισμός βρίσκεται σε εξέλιξη και συνεχίζεται με κάθε επίσκεψη στο κατάστημα.</target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>The last attempt failed (%code%); it is retried automatically.</source>
+        <target>Η τελευταία προσπάθεια απέτυχε (%code%)· επαναλαμβάνεται αυτόματα.</target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Synchronize now</source>
+        <target>Συγχρονισμός τώρα</target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>The synchronization stopped with the error %code%. It is retried automatically.</source>
+        <target>Ο συγχρονισμός σταμάτησε με το σφάλμα %code%. Επαναλαμβάνεται αυτόματα.</target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Synchronized for %seconds% seconds: %checked% items checked, %sent% sent to ChatPuff.</source>
+        <target>Συγχρονισμός για %seconds% δευτερόλεπτα: ελέγχθηκαν %checked% στοιχεία, στάλθηκαν %sent% στο ChatPuff.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

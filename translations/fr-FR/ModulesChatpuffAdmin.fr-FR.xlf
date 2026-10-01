@@ -230,6 +230,42 @@
         <source>Cloudflare's Bot Fight Mode cannot be skipped by a rule: switch it off while you connect. With another firewall, or a password on the shop, let requests to this address through.</source>
         <target>Le Bot Fight Mode de Cloudflare ne peut pas être contourné par une règle : désactivez-le le temps de la connexion. Avec un autre pare-feu ou un mot de passe sur la boutique, laissez passer les requêtes vers cette adresse.</target>
       </trans-unit>
+      <trans-unit id="58">
+        <source>Knowledge for the AI assistant</source>
+        <target>Connaissances pour l'assistant IA</target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>The module sends this shop's published products, categories and pages to ChatPuff every hour, so the assistant can answer from them. Choose what it may use on the ChatPuff dashboard; nothing about customers is sent.</source>
+        <target>Le module envoie chaque heure à ChatPuff les produits, catégories et pages publiés de cette boutique, pour que l'assistant puisse répondre à partir d'eux. Choisissez ce qu'il peut utiliser sur le tableau de bord ChatPuff ; rien sur les clients n'est envoyé.</target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Last complete synchronization: %date%.</source>
+        <target>Dernière synchronisation complète : %date%.</target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Not synchronized yet.</source>
+        <target>Pas encore synchronisé.</target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>A synchronization is in progress and continues with every visit to the shop.</source>
+        <target>Une synchronisation est en cours et se poursuit à chaque visite de la boutique.</target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>The last attempt failed (%code%); it is retried automatically.</source>
+        <target>La dernière tentative a échoué (%code%) ; elle est relancée automatiquement.</target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Synchronize now</source>
+        <target>Synchroniser maintenant</target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>The synchronization stopped with the error %code%. It is retried automatically.</source>
+        <target>La synchronisation s'est arrêtée avec l'erreur %code%. Elle est relancée automatiquement.</target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Synchronized for %seconds% seconds: %checked% items checked, %sent% sent to ChatPuff.</source>
+        <target>Synchronisé pendant %seconds% secondes : %checked% éléments vérifiés, %sent% envoyés à ChatPuff.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>
