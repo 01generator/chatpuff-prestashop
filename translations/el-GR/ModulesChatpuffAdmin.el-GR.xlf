@@ -266,6 +266,34 @@
         <source>Synchronized for %seconds% seconds: %checked% items checked, %sent% sent to ChatPuff.</source>
         <target>Συγχρονισμός για %seconds% δευτερόλεπτα: ελέγχθηκαν %checked% στοιχεία, στάλθηκαν %sent% στο ChatPuff.</target>
       </trans-unit>
+      <trans-unit id="67">
+        <source>Inbox</source>
+        <target>Εισερχόμενα</target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Settings</source>
+        <target>Ρυθμίσεις</target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Connect this shop to ChatPuff first.</source>
+        <target>Συνδέστε πρώτα αυτό το κατάστημα με το ChatPuff.</target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Open the settings</source>
+        <target>Άνοιγμα των ρυθμίσεων</target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Open the inbox</source>
+        <target>Άνοιγμα των εισερχομένων</target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Checked %done% of %total% items (%percent%%)…</source>
+        <target>Ελέγχθηκαν %done% από %total% στοιχεία (%percent%%)…</target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Synchronization complete: %sent% items sent to ChatPuff.</source>
+        <target>Ο συγχρονισμός ολοκληρώθηκε: %sent% στοιχεία στάλθηκαν στο ChatPuff.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

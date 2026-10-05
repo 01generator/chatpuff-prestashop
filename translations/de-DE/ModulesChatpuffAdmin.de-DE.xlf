@@ -266,6 +266,34 @@
         <source>Synchronized for %seconds% seconds: %checked% items checked, %sent% sent to ChatPuff.</source>
         <target>%seconds% Sekunden synchronisiert: %checked% Einträge geprüft, %sent% an ChatPuff gesendet.</target>
       </trans-unit>
+      <trans-unit id="67">
+        <source>Inbox</source>
+        <target>Posteingang</target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Settings</source>
+        <target>Einstellungen</target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Connect this shop to ChatPuff first.</source>
+        <target>Verbinden Sie diesen Shop zuerst mit ChatPuff.</target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Open the settings</source>
+        <target>Einstellungen öffnen</target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Open the inbox</source>
+        <target>Posteingang öffnen</target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Checked %done% of %total% items (%percent%%)…</source>
+        <target>%done% von %total% Einträgen geprüft (%percent%%)…</target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Synchronization complete: %sent% items sent to ChatPuff.</source>
+        <target>Synchronisierung abgeschlossen: %sent% Einträge an ChatPuff gesendet.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

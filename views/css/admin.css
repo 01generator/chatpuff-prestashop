@@ -83,3 +83,25 @@
   user-select: all;
   margin: 0 0 10px;
 }
+
+/* The knowledge synchronization's progress, drawn step after step by views/js/admin.js. */
+.chatpuff-progress {
+  height: 10px;
+  margin: 12px 0 6px;
+  max-width: 480px;
+  border-radius: 5px;
+  background: #e9ebee;
+  overflow: hidden;
+}
+
+.chatpuff-progress-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 5px;
+  background: #2b13a6;
+  transition: width 0.3s ease;
+}
+
+.chatpuff-knowledge [hidden] {
+  display: none !important;
+}

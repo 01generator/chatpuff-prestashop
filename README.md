@@ -12,7 +12,7 @@ This module connects a shop to ChatPuff. It is deliberately thin: the chat widge
 
 ## Connecting a shop
 
-1. Install the module and open **Customer Service > ChatPuff** in the back office.
+1. Install the module and open **ChatPuff > Settings** in the back office (until 0.8.0 the page was under Customer Service).
 2. Click **Connect to ChatPuff**. A ChatPuff page opens: sign in, or create a free account, and confirm the shop.
 3. ChatPuff checks that the request really comes from your shop's domain, and the back office shows the shop as connected.
 
@@ -39,11 +39,11 @@ The chat does not appear when:
 
 ## Answering chats in the back office
 
-**Customer Service > ChatPuff** shows the ChatPuff inbox once the shop is connected. Each employee links their back-office account to their own ChatPuff account once: click **Link my ChatPuff account**, sign in to ChatPuff in the window that opens, and confirm. The employee must be a member of the shop's ChatPuff organization with access to the shop; an owner or admin grants it in ChatPuff. Employees who may open the ChatPuff tab in PrestaShop see the inbox; what they may do in it is decided by their role in ChatPuff.
+**ChatPuff > Inbox** shows the ChatPuff inbox once the shop is connected. Each employee links their back-office account to their own ChatPuff account once: click **Link my ChatPuff account**, sign in to ChatPuff in the window that opens, and confirm. The employee must be a member of the shop's ChatPuff organization with access to the shop; an owner or admin grants it in ChatPuff. Employees who may open the ChatPuff tab in PrestaShop see the inbox; what they may do in it is decided by their role in ChatPuff.
 
 ## The AI assistant's knowledge
 
-From 0.7.0 the module sends the shop's published products, categories and CMS pages to ChatPuff, so that the AI assistant can answer customers from them: for each language, the product's name, reference, category, price with tax, availability and descriptions; the category's name and description; the page's title and content. Nothing about customers, orders or prices of customer groups is sent. The module sends what changed about once an hour, after a storefront page has reached its visitor, a few dozen items at a time; a large catalog takes a few hours the first time. **Customer Service > ChatPuff** shows where it stands and has a **Synchronize now** button. On the ChatPuff dashboard, the shop's Knowledge page lists what arrived, lets the merchant exclude anything, and takes the merchant's own questions and answers.
+From 0.7.0 the module sends the shop's published products, categories and CMS pages to ChatPuff, so that the AI assistant can answer customers from them: for each language, the product's name, reference, category, price with tax, availability and descriptions; the category's name and description; the page's title and content. Nothing about customers, orders or prices of customer groups is sent. The module sends what changed about once an hour, after a storefront page has reached its visitor, a few dozen items at a time; a large catalog takes a few hours the first time. **ChatPuff > Settings** shows where it stands and has a **Synchronize now** button, which runs the synchronization step by step with a progress bar until it is complete (from 0.8.0). On the ChatPuff dashboard, the shop's Knowledge page lists what arrived, lets the merchant exclude anything, and takes the merchant's own questions and answers.
 
 ### Security
 

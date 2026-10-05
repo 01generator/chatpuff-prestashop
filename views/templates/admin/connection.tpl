@@ -12,40 +12,6 @@
  * @copyright 2026 ChatPuff
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
  *}
-{if $chatpuff.state == 'connected' && isset($chatpuff.inbox)}
-  <div class="panel chatpuff-inbox-panel">
-    <div class="panel-heading">
-      <img src="{$chatpuff.logo_url|escape:'html':'UTF-8'}" alt="" width="16" height="16"> {l s='ChatPuff inbox' d='Modules.Chatpuff.Admin'}
-    </div>
-    <div class="chatpuff-backoffice"
-         data-chatpuff-backoffice
-         data-token-url="{$chatpuff.inbox.token_url|escape:'html':'UTF-8'}"
-         data-link-url="{$chatpuff.inbox.link_url|escape:'html':'UTF-8'}"
-         data-api="{$chatpuff.inbox.api|escape:'html':'UTF-8'}"
-         data-locale="{$chatpuff.inbox.locale|escape:'html':'UTF-8'}"
-         data-popup-blocked="{l s='Your browser blocked the ChatPuff window. Allow pop-ups for this back office and try again.' d='Modules.Chatpuff.Admin'}"
-         data-failed="{l s='The ChatPuff inbox could not be loaded. Check your internet connection and reload the page.' d='Modules.Chatpuff.Admin'}">
-      <p class="text-muted" data-chatpuff-when="loading">
-        <i class="icon-refresh icon-spin"></i> {l s='Loading the inbox…' d='Modules.Chatpuff.Admin'}
-      </p>
-      <div data-chatpuff-when="not_linked" hidden>
-        <h4>{l s='Link your ChatPuff account' d='Modules.Chatpuff.Admin'}</h4>
-        <p>{l s='To answer chats here, link your back-office account to your ChatPuff account once. A ChatPuff window opens where you sign in and confirm.' d='Modules.Chatpuff.Admin'}</p>
-        <button type="button" class="btn btn-primary" data-chatpuff-link>{l s='Link my ChatPuff account' d='Modules.Chatpuff.Admin'}</button>
-      </div>
-      <p class="text-muted" data-chatpuff-when="linking" hidden>
-        <i class="icon-refresh icon-spin"></i> {l s='Waiting for you to confirm in the ChatPuff window…' d='Modules.Chatpuff.Admin'}
-      </p>
-      <div data-chatpuff-when="no_access" hidden>
-        <div class="alert alert-warning">{l s='Your ChatPuff account has no access to this shop\'s chats. Ask an owner or admin of your ChatPuff organization to give you access, or link another account.' d='Modules.Chatpuff.Admin'}</div>
-        <button type="button" class="btn btn-default" data-chatpuff-link>{l s='Link another account' d='Modules.Chatpuff.Admin'}</button>
-      </div>
-      <div class="alert alert-danger" data-chatpuff-when="error" hidden></div>
-      <div class="chatpuff-inbox" data-chatpuff-when="ready" hidden></div>
-      <noscript><p>{l s='The inbox needs JavaScript.' d='Modules.Chatpuff.Admin'}</p></noscript>
-    </div>
-  </div>
-{/if}
 <div class="panel chatpuff-panel">
   <div class="panel-heading">
     <img src="{$chatpuff.logo_url|escape:'html':'UTF-8'}" alt="" width="16" height="16"> ChatPuff
@@ -62,7 +28,7 @@
     <p>{l s='Select a single shop at the top of the page. Each shop is connected to ChatPuff separately.' d='Modules.Chatpuff.Admin'}</p>
 
   {elseif $chatpuff.state == 'connected' || $chatpuff.state == 'just_connected'}
-    <div class="alert alert-success">{l s='This shop is connected to ChatPuff.' d='Modules.Chatpuff.Admin'}</div>
+    <div class="alert alert-success">{l s='This shop is connected to ChatPuff.' d='Modules.Chatpuff.Admin'} {if isset($chatpuff.inbox_url)}<a href="{$chatpuff.inbox_url|escape:'html':'UTF-8'}">{l s='Open the inbox' d='Modules.Chatpuff.Admin'}</a>{/if}</div>
     {if isset($chatpuff.status)}
       <dl class="chatpuff-details">
         <dt>{l s='Organization' d='Modules.Chatpuff.Admin'}</dt>
@@ -108,9 +74,18 @@
             <span class="text-danger">{l s='The last attempt failed (%code%); it is retried automatically.' sprintf=['%code%' => $chatpuff.knowledge.error] d='Modules.Chatpuff.Admin'}</span>
           {/if}
         </p>
-        <form method="post" action="{$chatpuff.admin_url|escape:'html':'UTF-8'}" class="chatpuff-inline">
-          <button type="submit" name="chatpuffSyncKnowledge" value="1" class="btn btn-default">{l s='Synchronize now' d='Modules.Chatpuff.Admin'}</button>
-        </form>
+        <div data-chatpuff-sync="{$chatpuff.knowledge.sync_url|escape:'html':'UTF-8'}"
+             data-label-progress="{l s='Checked %done% of %total% items (%percent%%)…' d='Modules.Chatpuff.Admin'}"
+             data-label-complete="{l s='Synchronization complete: %sent% items sent to ChatPuff.' d='Modules.Chatpuff.Admin'}"
+             data-label-error="{l s='The synchronization stopped with the error %code%. It is retried automatically.' d='Modules.Chatpuff.Admin'}">
+          <form method="post" action="{$chatpuff.admin_url|escape:'html':'UTF-8'}" class="chatpuff-inline">
+            <button type="submit" name="chatpuffSyncKnowledge" value="1" class="btn btn-default">{l s='Synchronize now' d='Modules.Chatpuff.Admin'}</button>
+          </form>
+          <div class="chatpuff-progress" data-chatpuff-sync-bar role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden>
+            <div class="chatpuff-progress-fill"></div>
+          </div>
+          <p class="help-block" data-chatpuff-sync-label aria-live="polite" hidden></p>
+        </div>
       </div>
     {/if}
     <form method="post" action="{$chatpuff.admin_url|escape:'html':'UTF-8'}" class="chatpuff-inline" data-chatpuff-confirm="{l s='Disconnect this shop from ChatPuff? Its chat history stays in ChatPuff.' d='Modules.Chatpuff.Admin'}">

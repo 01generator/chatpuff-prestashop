@@ -36,10 +36,11 @@ final class Knowledge
     /** Seconds between runs: hourly once a pass is complete, five minutes while one is in progress. */
     public const INTERVAL_COMPLETE = 3600;
     public const INTERVAL_IN_PROGRESS = 300;
-    /** Seconds a run may take after a storefront page was sent, from the module's page, and from the admin button. */
+    /** Seconds a run may take after a storefront page was sent, from the module's page, from the admin button, and per step of the page's progress bar. */
     public const STOREFRONT_BUDGET = 20;
     public const ADMIN_BUDGET = 40;
     public const PAGE_BUDGET = 5;
+    public const STEP_BUDGET = 8;
     private const KINDS = ['product', 'category', 'page'];
     /** Items read per database page, and sent per request (the contract allows 100). */
     private const PAGE = 40;
@@ -88,6 +89,40 @@ final class Knowledge
         \Configuration::updateValue(self::CLAIMED_AT, $now, false, (int) \Shop::getGroupFromShop($idShop, true), $idShop);
 
         return true;
+    }
+
+    /** Keeps the background runs away for a while: the page's own steps are running. */
+    public static function touch(int $idShop, int $now): void
+    {
+        \Configuration::updateValue(self::CLAIMED_AT, $now, false, (int) \Shop::getGroupFromShop($idShop, true), $idShop);
+    }
+
+    /**
+     * How far the pass is, for the page's progress bar: the items walked so far (every kind before
+     * the current one, and the current one up to the last ID sent) out of all the items published.
+     *
+     * @return array{done: int, total: int}
+     */
+    public static function progress(int $idShop): array
+    {
+        $cursor = self::cursor($idShop);
+        $done = 0;
+        $total = 0;
+        $reached = $cursor['kind'] === null;
+        foreach (self::KINDS as $kind) {
+            $count = self::count($idShop, $kind);
+            $total += $count;
+            if ($reached) {
+                $done += $count;
+            } elseif ($kind === $cursor['kind']) {
+                $done += self::count($idShop, $kind, $cursor['last_id']);
+                $reached = true;
+            } else {
+                $done += $count;
+            }
+        }
+
+        return ['done' => min($done, $total), 'total' => $total];
     }
 
     /**
@@ -209,31 +244,52 @@ final class Knowledge
      */
     private function ids(int $idShop, string $kind, int $after, bool $all = false): array
     {
-        $limit = $all ? '' : ' LIMIT ' . self::PAGE;
-        switch ($kind) {
-            case 'product':
-                $sql = 'SELECT p.id_product AS id FROM `' . _DB_PREFIX_ . 'product` p'
-                    . ' INNER JOIN `' . _DB_PREFIX_ . 'product_shop` ps ON ps.id_product = p.id_product AND ps.id_shop = ' . $idShop
-                    . " WHERE ps.active = 1 AND ps.visibility IN ('both', 'catalog', 'search') AND p.id_product > " . $after
-                    . ' ORDER BY p.id_product ASC' . $limit;
-                break;
-            case 'category':
-                $sql = 'SELECT c.id_category AS id FROM `' . _DB_PREFIX_ . 'category` c'
-                    . ' INNER JOIN `' . _DB_PREFIX_ . 'category_shop` cs ON cs.id_category = c.id_category AND cs.id_shop = ' . $idShop
-                    . ' WHERE c.active = 1 AND c.id_parent <> 0 AND c.id_category <> ' . (int) (new \Shop($idShop))->id_category . ' AND c.id_category > ' . $after
-                    . ' ORDER BY c.id_category ASC' . $limit;
-                break;
-            default:
-                $sql = 'SELECT c.id_cms AS id FROM `' . _DB_PREFIX_ . 'cms` c'
-                    . ' INNER JOIN `' . _DB_PREFIX_ . 'cms_shop` cs ON cs.id_cms = c.id_cms AND cs.id_shop = ' . $idShop
-                    . ' WHERE c.active = 1 AND c.id_cms > ' . $after
-                    . ' ORDER BY c.id_cms ASC' . $limit;
-        }
-        $rows = \Db::getInstance()->executeS($sql);
+        [$from, $id] = self::published($idShop, $kind);
+        $rows = \Db::getInstance()->executeS('SELECT ' . $id . ' AS id ' . $from . ' AND ' . $id . ' > ' . $after . ' ORDER BY ' . $id . ' ASC' . ($all ? '' : ' LIMIT ' . self::PAGE));
 
         return is_array($rows) ? array_map(static function (array $row): int {
             return (int) $row['id'];
         }, $rows) : [];
+    }
+
+    /** How many of a kind the shop publishes, up to an ID when one is given. */
+    private static function count(int $idShop, string $kind, ?int $upTo = null): int
+    {
+        [$from, $id] = self::published($idShop, $kind);
+
+        return (int) \Db::getInstance()->getValue('SELECT COUNT(*) ' . $from . ($upTo === null ? '' : ' AND ' . $id . ' <= ' . (int) $upTo));
+    }
+
+    /**
+     * The FROM and WHERE clauses of what the shop publishes of a kind, and the ID column.
+     *
+     * @return array{0: string, 1: string}
+     */
+    private static function published(int $idShop, string $kind): array
+    {
+        switch ($kind) {
+            case 'product':
+                return [
+                    'FROM `' . _DB_PREFIX_ . 'product` p'
+                    . ' INNER JOIN `' . _DB_PREFIX_ . 'product_shop` ps ON ps.id_product = p.id_product AND ps.id_shop = ' . $idShop
+                    . " WHERE ps.active = 1 AND ps.visibility IN ('both', 'catalog', 'search')",
+                    'p.id_product',
+                ];
+            case 'category':
+                return [
+                    'FROM `' . _DB_PREFIX_ . 'category` c'
+                    . ' INNER JOIN `' . _DB_PREFIX_ . 'category_shop` cs ON cs.id_category = c.id_category AND cs.id_shop = ' . $idShop
+                    . ' WHERE c.active = 1 AND c.id_parent <> 0 AND c.id_category <> ' . (int) (new \Shop($idShop))->id_category,
+                    'c.id_category',
+                ];
+            default:
+                return [
+                    'FROM `' . _DB_PREFIX_ . 'cms` c'
+                    . ' INNER JOIN `' . _DB_PREFIX_ . 'cms_shop` cs ON cs.id_cms = c.id_cms AND cs.id_shop = ' . $idShop
+                    . ' WHERE c.active = 1',
+                    'c.id_cms',
+                ];
+        }
     }
 
     /**

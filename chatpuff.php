@@ -52,13 +52,31 @@ class Chatpuff extends Module implements WidgetInterface
         $this->need_instance = 0;
         $this->bootstrap = true;
         $this->ps_versions_compliancy = ['min' => '1.7.8.0', 'max' => _PS_VERSION_];
+        // ChatPuff's own entry of the Sell section, with Inbox and Settings under it (0.8.0).
         $this->tabs = [
             [
                 'name' => 'ChatPuff',
                 'class_name' => 'AdminChatpuff',
                 'visible' => true,
-                'parent_class_name' => 'AdminParentCustomerThreads',
+                'parent_class_name' => 'SELL',
+                'icon' => 'chat',
                 'wording' => 'ChatPuff',
+                'wording_domain' => 'Modules.Chatpuff.Admin',
+            ],
+            [
+                'name' => 'Inbox',
+                'class_name' => 'AdminChatpuffInbox',
+                'visible' => true,
+                'parent_class_name' => 'AdminChatpuff',
+                'wording' => 'Inbox',
+                'wording_domain' => 'Modules.Chatpuff.Admin',
+            ],
+            [
+                'name' => 'Settings',
+                'class_name' => 'AdminChatpuffSettings',
+                'visible' => true,
+                'parent_class_name' => 'AdminChatpuff',
+                'wording' => 'Settings',
                 'wording_domain' => 'Modules.Chatpuff.Admin',
             ],
         ];
@@ -80,6 +98,7 @@ class Chatpuff extends Module implements WidgetInterface
         if (!parent::install() || !$this->registerHook(self::STOREFRONT_HOOKS) || !Knowledge::installTable()) {
             return false;
         }
+        self::removeDuplicatedParentTab();
         Settings::installationId();
 
         return true;
@@ -277,6 +296,18 @@ class Chatpuff extends Module implements WidgetInterface
 
     public function getContent(): void
     {
-        Tools::redirectAdmin($this->context->link->getAdminLink('AdminChatpuff'));
+        Tools::redirectAdmin($this->context->link->getAdminLink('AdminChatpuffSettings'));
+    }
+
+    /**
+     * PrestaShop copies a parent tab as its own first child, so that its link survives; ChatPuff's
+     * entry opens the inbox by itself, so the copy only doubles the menu.
+     */
+    public static function removeDuplicatedParentTab(): void
+    {
+        $idTab = (int) Tab::getIdFromClassName('AdminChatpuff_MTR');
+        if ($idTab > 0) {
+            (new Tab($idTab))->delete();
+        }
     }
 }
