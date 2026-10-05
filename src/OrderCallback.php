@@ -158,7 +158,8 @@ final class OrderCallback
     }
 
     /**
-     * The order's state as ChatPuff names it, from the shop's configured states and the state's flags.
+     * The order's state as ChatPuff names it, from the shop's configured states and the state's
+     * shipped, paid and logable flags.
      */
     private static function status(\Order $order, \OrderState $state): string
     {
@@ -177,7 +178,8 @@ final class OrderCallback
         if (!\Validate::isLoadedObject($state)) {
             return 'pending';
         }
-        if ($state->delivered || $is('PS_OS_DELIVERED')) {
+        // Order states have no "delivered" flag: the shop's configured delivered state says it.
+        if ($is('PS_OS_DELIVERED')) {
             return 'delivered';
         }
         if ($state->shipped || $is('PS_OS_SHIPPING')) {
