@@ -32,6 +32,8 @@ The chat is a button that floats in a corner of every storefront page. The modul
 
 Where the script lands does not move the button. The chat is not added to the maintenance page.
 
+On a product page, the tag names the product (its ID, name and address, `data-page`), and the chat sends it to ChatPuff with the customer's messages, so the team and the AI assistant know which product "is this one in stock?" is about. On other pages the chat sends the page's address and title.
+
 The chat does not appear when:
 - it is not published yet: the module's page says so, and an owner or admin publishes it from the shop's page in ChatPuff;
 - a page cache module serves pages saved before ChatPuff was installed: clear its cache;
@@ -40,6 +42,8 @@ The chat does not appear when:
 ## Answering chats in the back office
 
 **ChatPuff > Inbox** shows the ChatPuff inbox once the shop is connected. Each employee links their back-office account to their own ChatPuff account once: click **Link my ChatPuff account**, sign in to ChatPuff in the window that opens, and confirm. The employee must be a member of the shop's ChatPuff organization with access to the shop; an owner or admin grants it in ChatPuff. Employees who may open the ChatPuff tab in PrestaShop see the inbox; what they may do in it is decided by their role in ChatPuff.
+
+From 0.9.0, a badge next to **ChatPuff** and **Inbox** in the menu shows, on every back-office page, how many chats wait for the employee in ChatPuff: the chats waiting for someone to take them, and the employee's own chats with an unread message from the customer. It is refreshed every minute, and a chime plays when a chat starts waiting (the inbox's **Sound alerts** switch turns it off). The badge appears for employees who may open the Inbox tab and have linked their ChatPuff account; an employee who has not is left alone for an hour before the module asks ChatPuff again.
 
 ## The AI assistant's knowledge
 

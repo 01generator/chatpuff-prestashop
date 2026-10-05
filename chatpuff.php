@@ -39,6 +39,11 @@ class Chatpuff extends Module implements WidgetInterface
     public const STOREFRONT_HOOKS = ['displayBeforeBodyClosingTag', 'displayChatPuff', 'actionOutputHTMLBefore'];
 
     /**
+     * The back-office pages: the badge with what waits in ChatPuff, next to the menu entries.
+     */
+    public const BACK_OFFICE_HOOKS = ['displayBackOfficeHeader'];
+
+    /**
      * @var bool whether this page already has the chat's script
      */
     private static $widgetAdded = false;
@@ -95,7 +100,7 @@ class Chatpuff extends Module implements WidgetInterface
 
     public function install(): bool
     {
-        if (!parent::install() || !$this->registerHook(self::STOREFRONT_HOOKS) || !Knowledge::installTable()) {
+        if (!parent::install() || !$this->registerHook(self::STOREFRONT_HOOKS) || !$this->registerHook(self::BACK_OFFICE_HOOKS) || !Knowledge::installTable()) {
             return false;
         }
         self::removeDuplicatedParentTab();
@@ -107,6 +112,39 @@ class Chatpuff extends Module implements WidgetInterface
     public function hookDisplayBeforeBodyClosingTag(): string
     {
         return $this->widgetTag();
+    }
+
+    /**
+     * On every back-office page of a connected shop: a badge next to ChatPuff and Inbox in the
+     * menu with what waits for the employee in ChatPuff (api-contract.md §9), kept fresh every
+     * minute, and a chime when a chat starts waiting. The script asks the Inbox tab for a staff
+     * token, so only employees who may open the inbox get one; an employee whose account is not
+     * linked is left alone for an hour.
+     */
+    public function hookDisplayBackOfficeHeader(): string
+    {
+        if (Shop::isFeatureActive() && Shop::getContext() !== Shop::CONTEXT_SHOP) {
+            return '';
+        }
+        $idShop = (int) $this->context->shop->id;
+        if (!Validate::isLoadedObject($this->context->employee) || Settings::connection($idShop) === null) {
+            return '';
+        }
+        $idTab = (int) Tab::getIdFromClassName('AdminChatpuffInbox');
+        if ($idTab === 0 || !Tab::checkTabRights($idTab)) {
+            return '';
+        }
+        $api = new ApiClient();
+        if ((new Pairing($api, $this->context->link))->isCopy($idShop)) {
+            return '';
+        }
+        $setup = [
+            'token_url' => $this->context->link->getAdminLink('AdminChatpuffInbox') . '&ajax=1&action=staffToken',
+            'api' => $api->baseUrl(),
+        ];
+
+        return '<script type="application/json" id="chatpuff-badge-setup">' . json_encode($setup, JSON_HEX_TAG | JSON_HEX_AMP) . '</script>'
+            . '<script src="' . htmlspecialchars($this->getPathUri() . 'views/js/badge.js?v=' . ApiClient::MODULE_VERSION, ENT_QUOTES, 'UTF-8') . '" defer></script>';
     }
 
     /**
@@ -178,13 +216,40 @@ class Chatpuff extends Module implements WidgetInterface
         $this->reportAfterResponse((int) $shop->id);
 
         return sprintf(
-            '<script async data-cfasync="false" src="%s" data-shop="%s" data-locale="%s"%s%s></script>',
+            '<script async data-cfasync="false" src="%s" data-shop="%s" data-locale="%s"%s%s%s></script>',
             htmlspecialchars((new ApiClient())->baseUrl() . '/widget/v1/loader.js', ENT_QUOTES, 'UTF-8'),
             htmlspecialchars($widget['shop_id'], ENT_QUOTES, 'UTF-8'),
             htmlspecialchars((string) $this->context->language->iso_code, ENT_QUOTES, 'UTF-8'),
             $this->privacyAttribute((int) $shop->id),
-            $this->customerTokenAttribute((int) $shop->id)
+            $this->customerTokenAttribute((int) $shop->id),
+            $this->pageAttribute()
         );
+    }
+
+    /**
+     * On a product page, the product it shows (its ID, name and address), so that the team and
+     * the assistant know which one the customer is asking about (api-contract.md §8). The chat
+     * sends it with the customer's messages.
+     */
+    private function pageAttribute(): string
+    {
+        $controller = $this->context->controller;
+        if (!$controller instanceof ProductController) {
+            return '';
+        }
+        $product = $controller->getProduct();
+        if (!Validate::isLoadedObject($product)) {
+            return '';
+        }
+        $idLang = (int) $this->context->language->id;
+        $name = is_array($product->name) ? (string) ($product->name[$idLang] ?? reset($product->name)) : (string) $product->name;
+        $name = trim(strip_tags($name));
+        if ($name === '') {
+            return '';
+        }
+        $page = ['product' => ['id' => (string) $product->id, 'name' => $name, 'url' => $this->context->link->getProductLink($product)]];
+
+        return ' data-page="' . htmlspecialchars((string) json_encode($page, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8') . '"';
     }
 
     /**
