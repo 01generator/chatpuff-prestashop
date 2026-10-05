@@ -53,6 +53,8 @@ From 0.7.0 the module sends the shop's published products, categories and CMS pa
 
 From 0.10.0 a customer can prove in the chat that an order is theirs before the team talks about it: they type the order reference (or the order number), and ChatPuff emails a code to the address on the order; a logged-in customer's own order is verified at once. To do that, ChatPuff asks the module about the order through its callback (`?action=order`), and the module answers only when the call is signed with ChatPuff's own key, was made within the last five minutes, and was never seen before. The answer names the order, its customer and the email address on it, nothing else, and only for an order of the shop that was asked about. Nothing changes in the shop, and no order data is stored at ChatPuff beyond the verification itself.
 
+From 0.11.0, while the verification lasts (an hour), the customer who verified an order sees its card in the chat: when it was placed, its status in the shop's own words, the products and quantities, and the tracking number with the carrier's tracking link. ChatPuff asks the module for it each time with the same signed call (`?action=order_details`); no prices, addresses or payment details are sent, and ChatPuff keeps no copy. In the back-office inbox a verified order has an **Open in the back office** link to the order's page, where PrestaShop applies the employee's own permissions; ChatPuff itself shows the team no order details.
+
 ### Security
 
 - The module creates its own Ed25519 key pair on your server. The private key never leaves the shop and is stored encrypted with your shop's cookie key; ChatPuff only receives the public key.

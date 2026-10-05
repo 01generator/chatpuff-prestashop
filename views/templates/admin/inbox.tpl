@@ -23,6 +23,7 @@
          data-link-url="{$chatpuff.inbox.link_url|escape:'html':'UTF-8'}"
          data-api="{$chatpuff.inbox.api|escape:'html':'UTF-8'}"
          data-locale="{$chatpuff.inbox.locale|escape:'html':'UTF-8'}"
+         data-order-url="{$chatpuff.inbox.order_url|escape:'html':'UTF-8'}"
          data-popup-blocked="{l s='Your browser blocked the ChatPuff window. Allow pop-ups for this back office and try again.' d='Modules.Chatpuff.Admin'}"
          data-failed="{l s='The ChatPuff inbox could not be loaded. Check your internet connection and reload the page.' d='Modules.Chatpuff.Admin'}">
       <p class="text-muted" data-chatpuff-when="loading">

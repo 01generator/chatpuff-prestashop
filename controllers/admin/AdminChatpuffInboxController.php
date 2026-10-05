@@ -22,6 +22,7 @@ require_once _PS_MODULE_DIR_ . 'chatpuff/vendor/autoload.php';
 
 use ChatPuff\PrestaShop\Admin\ChatpuffAdminController;
 use ChatPuff\PrestaShop\ApiClient;
+use ChatPuff\PrestaShop\OrderCallback;
 use ChatPuff\PrestaShop\Settings;
 
 /**
@@ -77,6 +78,8 @@ class AdminChatpuffInboxController extends ChatpuffAdminController
                     'link_url' => $this->context->link->getAdminLink('AdminChatpuffInbox') . '&ajax=1&action=employeeLink',
                     'api' => (new ApiClient())->baseUrl(),
                     'locale' => (string) $this->context->language->iso_code,
+                    // A verified order links to its own page here, where PrestaShop checks the employee's permissions.
+                    'order_url' => OrderCallback::adminOrderUrl($this->context->link),
                 ];
             } else {
                 $view['state'] = 'not_connected';

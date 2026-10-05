@@ -82,26 +82,12 @@ class ChatpuffCallbackModuleFrontController extends ModuleFrontController
 
     public function displayAjaxOrder(): void
     {
-        header('Content-Type: application/json');
-        header('Cache-Control: no-store');
-        header('X-Robots-Tag: noindex');
-
-        $idShop = (int) Tools::getValue('shop_context');
-        $reference = (string) Tools::getValue('reference');
         $callback = new OrderCallback(new ApiClient());
-        $headers = [
-            'Chatpuff-Key-Id' => (string) ($_SERVER['HTTP_CHATPUFF_KEY_ID'] ?? ''),
-            'Chatpuff-Timestamp' => (string) ($_SERVER['HTTP_CHATPUFF_TIMESTAMP'] ?? ''),
-            'Chatpuff-Nonce' => (string) ($_SERVER['HTTP_CHATPUFF_NONCE'] ?? ''),
-            'Chatpuff-Signature' => (string) ($_SERVER['HTTP_CHATPUFF_SIGNATURE'] ?? ''),
-        ];
-        // The signature covers the request target exactly as ChatPuff sent it.
-        if ($idShop <= 0 || !$callback->isSignedByChatPuff($idShop, $headers, (string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'), (string) ($_SERVER['REQUEST_URI'] ?? ''))) {
-            http_response_code(401);
-            $this->ajaxRender((string) json_encode(['code' => 'invalid_signature']));
-
+        $idShop = $this->signedShop($callback);
+        if ($idShop === null) {
             return;
         }
+        $reference = (string) Tools::getValue('reference');
         if (preg_match('/^[A-Z0-9_-]{1,40}$/', $reference) !== 1) {
             http_response_code(400);
             $this->ajaxRender((string) json_encode(['code' => 'invalid_reference']));
@@ -117,6 +103,53 @@ class ChatpuffCallbackModuleFrontController extends ModuleFrontController
             return;
         }
         $this->ajaxRender((string) json_encode(['order' => $order]));
+    }
+
+    /**
+     * What may be told about an order the customer verified (api-contract.md §7.7, order_details).
+     */
+    public function displayAjaxOrderDetails(): void
+    {
+        $callback = new OrderCallback(new ApiClient());
+        $idShop = $this->signedShop($callback);
+        if ($idShop === null) {
+            return;
+        }
+        $order = $callback->describeOrder($idShop, (string) Tools::getValue('order_id'));
+        if ($order === null) {
+            http_response_code(404);
+            $this->ajaxRender((string) json_encode(['code' => 'order_not_found']));
+
+            return;
+        }
+        $this->ajaxRender((string) json_encode(['order' => $order], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    }
+
+    /**
+     * The JSON headers of an order call, and its shop when ChatPuff signed it; otherwise answers 401.
+     */
+    private function signedShop(OrderCallback $callback): ?int
+    {
+        header('Content-Type: application/json');
+        header('Cache-Control: no-store');
+        header('X-Robots-Tag: noindex');
+
+        $idShop = (int) Tools::getValue('shop_context');
+        $headers = [
+            'Chatpuff-Key-Id' => (string) ($_SERVER['HTTP_CHATPUFF_KEY_ID'] ?? ''),
+            'Chatpuff-Timestamp' => (string) ($_SERVER['HTTP_CHATPUFF_TIMESTAMP'] ?? ''),
+            'Chatpuff-Nonce' => (string) ($_SERVER['HTTP_CHATPUFF_NONCE'] ?? ''),
+            'Chatpuff-Signature' => (string) ($_SERVER['HTTP_CHATPUFF_SIGNATURE'] ?? ''),
+        ];
+        // The signature covers the request target exactly as ChatPuff sent it.
+        if ($idShop <= 0 || !$callback->isSignedByChatPuff($idShop, $headers, (string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'), (string) ($_SERVER['REQUEST_URI'] ?? ''))) {
+            http_response_code(401);
+            $this->ajaxRender((string) json_encode(['code' => 'invalid_signature']));
+
+            return null;
+        }
+
+        return $idShop;
     }
 
     public function displayAjax(): void
