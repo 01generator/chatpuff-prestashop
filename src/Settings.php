@@ -172,7 +172,7 @@ final class Settings
 
     public static function deleteAll(): void
     {
-        foreach ([self::INSTALLATION_ID, self::CONNECTION, self::PAIRING, self::REPORTED_AT, self::PRIVACY_CMS, Knowledge::CURSOR, Knowledge::CLAIMED_AT] as $key) {
+        foreach ([self::INSTALLATION_ID, self::CONNECTION, self::PAIRING, self::REPORTED_AT, self::PRIVACY_CMS, Knowledge::CURSOR, Knowledge::CLAIMED_AT, OrderCallback::NONCES] as $key) {
             \Configuration::deleteByName($key);
         }
     }

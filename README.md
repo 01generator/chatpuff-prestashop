@@ -49,6 +49,10 @@ From 0.9.0, a badge next to **ChatPuff** and **Inbox** in the menu shows, on eve
 
 From 0.7.0 the module sends the shop's published products, categories and CMS pages to ChatPuff, so that the AI assistant can answer customers from them: for each language, the product's name, reference, category, price with tax, availability and descriptions; the category's name and description; the page's title and content. Nothing about customers, orders or prices of customer groups is sent. The module sends what changed about once an hour, after a storefront page has reached its visitor, a few dozen items at a time; a large catalog takes a few hours the first time. **ChatPuff > Settings** shows where it stands and has a **Synchronize now** button, which runs the synchronization step by step with a progress bar until it is complete (from 0.8.0). On the ChatPuff dashboard, the shop's Knowledge page lists what arrived, lets the merchant exclude anything, and takes the merchant's own questions and answers.
 
+## Verifying orders in the chat
+
+From 0.10.0 a customer can prove in the chat that an order is theirs before the team talks about it: they type the order reference (or the order number), and ChatPuff emails a code to the address on the order; a logged-in customer's own order is verified at once. To do that, ChatPuff asks the module about the order through its callback (`?action=order`), and the module answers only when the call is signed with ChatPuff's own key, was made within the last five minutes, and was never seen before. The answer names the order, its customer and the email address on it, nothing else, and only for an order of the shop that was asked about. Nothing changes in the shop, and no order data is stored at ChatPuff beyond the verification itself.
+
 ### Security
 
 - The module creates its own Ed25519 key pair on your server. The private key never leaves the shop and is stored encrypted with your shop's cookie key; ChatPuff only receives the public key.
