@@ -126,6 +126,20 @@ class ChatpuffCallbackModuleFrontController extends ModuleFrontController
     }
 
     /**
+     * A signed-in customer's latest orders (api-contract.md §7.7, customer_orders).
+     */
+    public function displayAjaxCustomerOrders(): void
+    {
+        $callback = new OrderCallback(new ApiClient());
+        $idShop = $this->signedShop($callback);
+        if ($idShop === null) {
+            return;
+        }
+        $orders = $callback->customerOrders($idShop, (string) Tools::getValue('customer_id'));
+        $this->ajaxRender((string) json_encode(['orders' => $orders], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    }
+
+    /**
      * The JSON headers of an order call, and its shop when ChatPuff signed it; otherwise answers 401.
      */
     private function signedShop(OrderCallback $callback): ?int

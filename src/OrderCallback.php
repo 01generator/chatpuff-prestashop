@@ -32,6 +32,8 @@ final class OrderCallback
 {
     public const CAPABILITY = 'order_verification';
     public const DETAILS_CAPABILITY = 'order_details';
+    public const LIST_CAPABILITY = 'customer_orders';
+    private const MAX_RECENT = 5;
     /** A stand-in order ID, replaced by {id} in the back office's order address. */
     private const SAMPLE_ORDER_ID = 987654321;
     private const MAX_ITEMS = 50;
@@ -127,6 +129,50 @@ final class OrderCallback
         if (!\Validate::isLoadedObject($order) || (int) $order->id_shop !== $idShop) {
             return null;
         }
+
+        return self::summary($order) + [
+            'items' => self::items((int) $order->id),
+            'tracking' => self::tracking($order),
+        ];
+    }
+
+    /**
+     * A signed-in customer's latest orders in this shop, newest first, so that they can pick one
+     * in the chat (api-contract.md §7.7, customer_orders). A guest checkout's customer has none.
+     *
+     * @return list<array<string, string>>
+     */
+    public function customerOrders(int $idShop, string $customerId): array
+    {
+        if (preg_match('/^[1-9]\d{0,9}$/', $customerId) !== 1) {
+            return [];
+        }
+        $customer = new \Customer((int) $customerId);
+        if (!\Validate::isLoadedObject($customer) || $customer->is_guest) {
+            return [];
+        }
+        $rows = \Db::getInstance()->executeS(
+            'SELECT `id_order` FROM `' . _DB_PREFIX_ . 'orders` WHERE `id_customer` = ' . (int) $customer->id . ' AND `id_shop` = ' . (int) $idShop
+            . ' ORDER BY `date_add` DESC, `id_order` DESC LIMIT ' . self::MAX_RECENT
+        );
+        $orders = [];
+        foreach (is_array($rows) ? $rows : [] as $row) {
+            $order = new \Order((int) $row['id_order']);
+            if (\Validate::isLoadedObject($order)) {
+                $orders[] = self::summary($order);
+            }
+        }
+
+        return $orders;
+    }
+
+    /**
+     * The order's ID, reference, date and status, with the state's name in the order's language.
+     *
+     * @return array<string, string>
+     */
+    private static function summary(\Order $order): array
+    {
         $state = new \OrderState((int) $order->current_state, (int) $order->id_lang);
         $status = self::status($order, $state);
         $label = \Validate::isLoadedObject($state) ? trim((string) $state->name) : '';
@@ -137,8 +183,6 @@ final class OrderCallback
             'placed_at' => date(DATE_ATOM, (int) strtotime((string) $order->date_add)),
             'status' => $status,
             'status_label' => $label !== '' ? (string) \Tools::substr($label, 0, 100) : ucfirst($status),
-            'items' => self::items((int) $order->id),
-            'tracking' => self::tracking($order),
         ];
     }
 

@@ -251,7 +251,7 @@ final class Pairing
             'integration_version' => ApiClient::MODULE_VERSION,
             'api_contract_version' => ApiClient::API_CONTRACT_VERSION,
             // Added as the features ship.
-            'capabilities' => ['customer_identity', 'back_office_inbox', 'knowledge_sync', OrderCallback::CAPABILITY, OrderCallback::DETAILS_CAPABILITY],
+            'capabilities' => ['customer_identity', 'back_office_inbox', 'knowledge_sync', OrderCallback::CAPABILITY, OrderCallback::DETAILS_CAPABILITY, OrderCallback::LIST_CAPABILITY],
         ];
     }
 
