@@ -67,6 +67,8 @@ From 0.12.0 a customer who is signed in to the shop sees their latest orders (at
 
 ## Troubleshooting
 
+**The inbox says "You were signed out. Reload the page to sign in again."** Your back-office session ended (or another employee signed in on this browser): from 0.12.1 the inbox says so instead of "ChatPuff cannot be reached. Trying again…". Reload the page.
+
 **"ChatPuff could not reach this shop to check it."** When you connect, ChatPuff calls `/module/chatpuff/callback` on your shop's own address to prove that the shop is yours. Something in front of the shop answered instead of the module:
 
 - **Cloudflare.** Its bot protection answers with a challenge page (HTTP 403 or 503). Add a custom rule (Security > WAF > Custom rules, or Security rules in the newer dashboard) with the expression below and the action **Skip**. Tick "All remaining custom rules", and under the other components "Security Level" and "Browser Integrity Check". Place it first, save it, and connect again.

@@ -82,8 +82,13 @@ abstract class ChatpuffAdminController extends \ModuleAdminController
     protected function renderJson(\Closure $action): void
     {
         $idShop = $this->currentShopId();
-        $result = ['state' => 'error', 'error' => $this->trans('Your session expired. Please try again.', [], 'Modules.Chatpuff.Admin')];
-        if ($idShop !== null && $this->checkToken() && $this->access('view')) {
+        $expired = $this->trans('Your session expired. Please try again.', [], 'Modules.Chatpuff.Admin');
+        $result = ['state' => 'error', 'error' => $expired];
+        if (!$this->checkToken() || !$this->access('view')) {
+            // The employee's session ended, another employee signed in, or the profile lost this
+            // tab: the page must be reloaded, and the inbox script says so (state "signed_out").
+            $result = ['state' => 'signed_out', 'error' => $expired];
+        } elseif ($idShop !== null) {
             try {
                 $result = $action($idShop);
             } catch (ApiException $exception) {
