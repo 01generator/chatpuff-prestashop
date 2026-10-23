@@ -88,9 +88,11 @@
         </div>
       </div>
     {/if}
-    <form method="post" action="{$chatpuff.admin_url|escape:'html':'UTF-8'}" class="chatpuff-inline" data-chatpuff-confirm="{l s='Disconnect this shop from ChatPuff? Its chat history stays in ChatPuff.' d='Modules.Chatpuff.Admin'}">
-      <button type="submit" name="chatpuffDisconnect" value="1" class="btn btn-default">{l s='Disconnect' d='Modules.Chatpuff.Admin'}</button>
-    </form>
+    <div class="chatpuff-disconnect">
+      <form method="post" action="{$chatpuff.admin_url|escape:'html':'UTF-8'}" class="chatpuff-inline" data-chatpuff-confirm="{l s='Disconnect this shop from ChatPuff? Its chat history stays in ChatPuff.' d='Modules.Chatpuff.Admin'}">
+        <button type="submit" name="chatpuffDisconnect" value="1" class="btn btn-outline-danger">{l s='Disconnect' d='Modules.Chatpuff.Admin'}</button>
+      </form>
+    </div>
 
   {elseif $chatpuff.state == 'copy'}
     <div class="alert alert-warning">

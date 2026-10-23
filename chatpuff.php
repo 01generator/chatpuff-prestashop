@@ -44,6 +44,12 @@ class Chatpuff extends Module implements WidgetInterface
     public const BACK_OFFICE_HOOKS = ['displayBackOfficeHeader'];
 
     /**
+     * The module version whose menu was last checked for the copy of the parent entry that
+     * PrestaShop keeps as its first child (0.12.2): checked again once after every upgrade.
+     */
+    public const MENU_CLEANED = 'CHATPUFF_MENU_CLEANED';
+
+    /**
      * @var bool whether this page already has the chat's script
      */
     private static $widgetAdded = false;
@@ -103,7 +109,7 @@ class Chatpuff extends Module implements WidgetInterface
         if (!parent::install() || !$this->registerHook(self::STOREFRONT_HOOKS) || !$this->registerHook(self::BACK_OFFICE_HOOKS) || !Knowledge::installTable()) {
             return false;
         }
-        self::removeDuplicatedParentTab();
+        self::removeRedundantMenuEntry();
         Settings::installationId();
 
         return true;
@@ -123,6 +129,11 @@ class Chatpuff extends Module implements WidgetInterface
      */
     public function hookDisplayBackOfficeHeader(): string
     {
+        // PrestaShop 8 and 9 register a module's tabs after install() returns, so the copy of the parent
+        // entry is removed from the first back-office page, once per module version.
+        if (Configuration::get(self::MENU_CLEANED) !== ApiClient::MODULE_VERSION && self::removeRedundantMenuEntry()) {
+            Configuration::updateGlobalValue(self::MENU_CLEANED, ApiClient::MODULE_VERSION);
+        }
         if (Shop::isFeatureActive() && Shop::getContext() !== Shop::CONTEXT_SHOP) {
             return '';
         }
@@ -365,14 +376,36 @@ class Chatpuff extends Module implements WidgetInterface
     }
 
     /**
-     * PrestaShop copies a parent tab as its own first child, so that its link survives; ChatPuff's
-     * entry opens the inbox by itself, so the copy only doubles the menu.
+     * When a module declares a parent entry with children, PrestaShop makes the menu's parent a copy
+     * of it with the suffix _MTR (a container without a controller) and keeps the declared entry, the
+     * one with the controller, as its first child, so that its page stays reachable. ChatPuff's entry
+     * only opens the inbox, so that child doubles the menu: it goes, and the container stays as the
+     * parent of Inbox and Settings. Shops upgraded from 0.7 have the entry itself as the parent and
+     * nothing doubled. The tabs are read with plain queries: Tab::getIdFromClassName() caches the
+     * table for the request, before the tabs were registered.
+     *
+     * @return bool whether the menu is clean now
+     */
+    public static function removeRedundantMenuEntry(): bool
+    {
+        $db = Db::getInstance();
+        $idContainer = (int) $db->getValue('SELECT id_tab FROM `' . _DB_PREFIX_ . 'tab` WHERE class_name = \'AdminChatpuff_MTR\'');
+        if ($idContainer === 0) {
+            return true;
+        }
+        $idEntry = (int) $db->getValue('SELECT id_tab FROM `' . _DB_PREFIX_ . 'tab` WHERE class_name = \'AdminChatpuff\' AND id_parent = ' . $idContainer);
+        if ($idEntry === 0) {
+            return true;
+        }
+
+        return (bool) (new Tab($idEntry))->delete();
+    }
+
+    /**
+     * The name before 0.12.2, kept for the upgrade script of 0.8.0.
      */
     public static function removeDuplicatedParentTab(): void
     {
-        $idTab = (int) Tab::getIdFromClassName('AdminChatpuff_MTR');
-        if ($idTab > 0) {
-            (new Tab($idTab))->delete();
-        }
+        self::removeRedundantMenuEntry();
     }
 }

@@ -40,6 +40,13 @@
   display: inline-block;
 }
 
+/* Disconnect stands apart from the knowledge block above it, with a confirmation before it acts. */
+.chatpuff-disconnect {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid #dfdfdf;
+}
+
 .chatpuff-inbox-panel .panel-heading img {
   vertical-align: text-bottom;
   margin-right: 4px;

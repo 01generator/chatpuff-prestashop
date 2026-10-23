@@ -28,7 +28,8 @@
   var POLL_MS = 60000;
   var FRESH_MS = 20000;
   var QUIET_MS = 3600000;
-  var SELECTORS = ['#subtab-AdminChatpuff > a', '#subtab-AdminChatpuffInbox > a'];
+  // The ChatPuff entry: the container PrestaShop makes of it (_MTR), or the entry itself on shops upgraded from 0.7.
+  var SELECTORS = ['#subtab-AdminChatpuff_MTR > a', '#subtab-AdminChatpuff > a', '#subtab-AdminChatpuffInbox > a'];
 
   function init() {
     var node = document.getElementById('chatpuff-badge-setup');
