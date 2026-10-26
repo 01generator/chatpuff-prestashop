@@ -315,7 +315,11 @@ final class Knowledge
                     . ' LEFT JOIN `' . _DB_PREFIX_ . 'category_lang` cl ON cl.id_category = ps.id_category_default AND cl.id_shop = ' . $idShop . ' AND cl.id_lang = ' . $idLang
                     . ' WHERE p.id_product IN (' . $in . ') ORDER BY p.id_product ASC'
                 );
-                foreach (is_array($rows) ? $rows : [] as $row) {
+                $rows = is_array($rows) ? $rows : [];
+                $prices = $this->guestPrices($idShop, array_map(static function (array $row): int {
+                    return (int) $row['id_product'];
+                }, $rows));
+                foreach ($rows as $row) {
                     $id = (int) $row['id_product'];
                     $lines = [];
                     if (trim((string) $row['reference']) !== '') {
@@ -324,7 +328,7 @@ final class Knowledge
                     if (trim((string) $row['category']) !== '') {
                         $lines[] = $this->label('Category', $language) . ': ' . trim((string) $row['category']);
                     }
-                    $lines[] = $this->label('Price', $language) . ': ' . $this->price($id);
+                    $lines[] = $this->label('Price', $language) . ': ' . $prices[$id];
                     $lines[] = $this->availability($idShop, $id, $language);
                     $text = implode("\n", $lines) . "\n\n" . self::plainText((string) $row['description_short']) . "\n\n" . self::plainText((string) $row['description']);
                     $sources[] = $this->source($kind, (string) $id, $language['locale'], (string) $row['name'], $this->link->getProductLink($id, null, null, null, $idLang, $idShop), $text);
@@ -433,22 +437,50 @@ final class Knowledge
         \Db::getInstance()->execute($sql);
     }
 
-    /** The price customers see: with tax, in the context's currency. */
-    private function price(int $idProduct): string
+    /**
+     * The prices a guest in the shop's default country sees, with tax, in the shop's default
+     * currency, written the same way in every language. A pass runs in the request that started
+     * it: a visitor's language, currency, address or group, or an employee's, would change the
+     * text from one pass to the next, and ChatPuff indexes a product again whenever its text
+     * changes. The request's own context is put back afterwards.
+     *
+     * @param list<int> $ids
+     *
+     * @return array<int, string>
+     */
+    private function guestPrices(int $idShop, array $ids): array
     {
-        $price = (float) \Product::getPriceStatic($idProduct, true, null, 2);
         $context = \Context::getContext();
-        $currency = $context->currency;
-        $iso = $currency !== null ? (string) $currency->iso_code : '';
+        $saved = [$context->shop, $context->customer, $context->cart, $context->country, $context->currency];
+        if (!$context->shop instanceof \Shop || (int) $context->shop->id !== $idShop) {
+            $context->shop = new \Shop($idShop);
+        }
+        $context->customer = new \Customer();
+        $context->cart = new \Cart();
+        $country = new \Country((int) \Configuration::get('PS_COUNTRY_DEFAULT', null, null, $idShop));
+        if (\Validate::isLoadedObject($country)) {
+            $context->country = $country;
+        }
+        $currency = \Currency::getCurrencyInstance((int) \Configuration::get('PS_CURRENCY_DEFAULT', null, null, $idShop));
+        if (\Validate::isLoadedObject($currency)) {
+            $context->currency = $currency;
+        }
+        $iso = \Validate::isLoadedObject($context->currency) ? (string) $context->currency->iso_code : '';
+        $prices = [];
         try {
-            if (method_exists($context, 'getCurrentLocale') && $iso !== '') {
-                return (string) $context->getCurrentLocale()->formatPrice($price, $iso);
+            foreach ($ids as $id) {
+                $price = (float) \Product::getPriceStatic($id, true, null, 2);
+                $prices[$id] = number_format($price, 2, '.', '') . ($iso !== '' ? ' ' . $iso : '');
             }
-        } catch (\Exception $exception) {
-            // The plain number below.
+        } finally {
+            $context->shop = $saved[0];
+            $context->customer = $saved[1];
+            $context->cart = $saved[2];
+            $context->country = $saved[3];
+            $context->currency = $saved[4];
         }
 
-        return number_format($price, 2, '.', '') . ($iso !== '' ? ' ' . $iso : '');
+        return $prices;
     }
 
     /**
