@@ -44,6 +44,18 @@ class Chatpuff extends Module implements WidgetInterface
     public const BACK_OFFICE_HOOKS = ['displayBackOfficeHeader'];
 
     /**
+     * What changes a product for the assistant's knowledge (0.12.4): the product itself, its stock,
+     * its combinations and the prices of its own. Each is sent once the response is out, instead of
+     * waiting for the next pass.
+     */
+    public const KNOWLEDGE_HOOKS = [
+        'actionObjectProductAddAfter', 'actionObjectProductUpdateAfter', 'actionObjectProductDeleteAfter',
+        'actionUpdateQuantity',
+        'actionObjectCombinationAddAfter', 'actionObjectCombinationUpdateAfter', 'actionObjectCombinationDeleteAfter',
+        'actionObjectSpecificPriceAddAfter', 'actionObjectSpecificPriceUpdateAfter', 'actionObjectSpecificPriceDeleteAfter',
+    ];
+
+    /**
      * The module version whose menu was last checked for the copy of the parent entry that
      * PrestaShop keeps as its first child (0.12.2): checked again once after every upgrade.
      */
@@ -53,6 +65,11 @@ class Chatpuff extends Module implements WidgetInterface
      * @var bool whether this page already has the chat's script
      */
     private static $widgetAdded = false;
+
+    /**
+     * @var bool whether this request sends the changed products once its response is out
+     */
+    private static $changesQueued = false;
 
     public function __construct()
     {
@@ -106,7 +123,7 @@ class Chatpuff extends Module implements WidgetInterface
 
     public function install(): bool
     {
-        if (!parent::install() || !$this->registerHook(self::STOREFRONT_HOOKS) || !$this->registerHook(self::BACK_OFFICE_HOOKS) || !Knowledge::installTable()) {
+        if (!parent::install() || !$this->registerHook(self::STOREFRONT_HOOKS) || !$this->registerHook(self::BACK_OFFICE_HOOKS) || !$this->registerHook(self::KNOWLEDGE_HOOKS) || !Knowledge::installTable()) {
             return false;
         }
         self::removeRedundantMenuEntry();
@@ -156,6 +173,71 @@ class Chatpuff extends Module implements WidgetInterface
 
         return '<script type="application/json" id="chatpuff-badge-setup">' . json_encode($setup, JSON_HEX_TAG | JSON_HEX_AMP) . '</script>'
             . '<script src="' . htmlspecialchars($this->getPathUri() . 'views/js/badge.js?v=' . ApiClient::MODULE_VERSION, ENT_QUOTES, 'UTF-8') . '" defer></script>';
+    }
+
+    /** @param array<string, mixed> $params 'object': the product */
+    public function hookActionObjectProductAddAfter(array $params): void
+    {
+        $this->productChanged($params['object'] ?? null);
+    }
+
+    /** @param array<string, mixed> $params 'object': the product */
+    public function hookActionObjectProductUpdateAfter(array $params): void
+    {
+        $this->productChanged($params['object'] ?? null);
+    }
+
+    /** @param array<string, mixed> $params 'object': the product */
+    public function hookActionObjectProductDeleteAfter(array $params): void
+    {
+        $this->productChanged($params['object'] ?? null);
+    }
+
+    /**
+     * A product's stock changed (an order, a return, the back office). Its text changes only when
+     * it runs out or comes back, and nothing is sent otherwise.
+     *
+     * @param array<string, mixed> $params 'id_product'
+     */
+    public function hookActionUpdateQuantity(array $params): void
+    {
+        $this->noteProduct((int) ($params['id_product'] ?? 0));
+    }
+
+    /** @param array<string, mixed> $params 'object': the combination */
+    public function hookActionObjectCombinationAddAfter(array $params): void
+    {
+        $this->partChanged($params['object'] ?? null);
+    }
+
+    /** @param array<string, mixed> $params 'object': the combination */
+    public function hookActionObjectCombinationUpdateAfter(array $params): void
+    {
+        $this->partChanged($params['object'] ?? null);
+    }
+
+    /** @param array<string, mixed> $params 'object': the combination */
+    public function hookActionObjectCombinationDeleteAfter(array $params): void
+    {
+        $this->partChanged($params['object'] ?? null);
+    }
+
+    /** @param array<string, mixed> $params 'object': the specific price */
+    public function hookActionObjectSpecificPriceAddAfter(array $params): void
+    {
+        $this->partChanged($params['object'] ?? null);
+    }
+
+    /** @param array<string, mixed> $params 'object': the specific price */
+    public function hookActionObjectSpecificPriceUpdateAfter(array $params): void
+    {
+        $this->partChanged($params['object'] ?? null);
+    }
+
+    /** @param array<string, mixed> $params 'object': the specific price */
+    public function hookActionObjectSpecificPriceDeleteAfter(array $params): void
+    {
+        $this->partChanged($params['object'] ?? null);
     }
 
     /**
@@ -290,36 +372,110 @@ class Chatpuff extends Module implements WidgetInterface
      */
     private function reportAfterResponse(int $idShop): void
     {
-        if (function_exists('fastcgi_finish_request')) {
-            $finish = static function (): void {
-                fastcgi_finish_request();
-            };
-        } elseif (function_exists('litespeed_finish_request')) {
-            $finish = static function (): void {
-                litespeed_finish_request();
-            };
-        } else {
+        $finish = self::finisher();
+        if ($finish === null) {
             return;
         }
         $now = time();
         $report = Settings::claimReport($idShop, $now);
         // The assistant's knowledge (api-contract.md §7.6): a slice of the shop's content per run, within a budget.
         $knowledge = Knowledge::claim($idShop, $now);
-        if (!$report && !$knowledge) {
+        // Products changed where no response could be finished early (an import from the command line).
+        $changes = Knowledge::hasPending($idShop);
+        if (!$report && !$knowledge && !$changes) {
             return;
         }
         $link = $this->context->link;
-        register_shutdown_function(static function () use ($finish, $idShop, $link, $report, $knowledge): void {
+        register_shutdown_function(static function () use ($finish, $idShop, $link, $report, $knowledge, $changes): void {
             $finish();
             try {
                 if ($report) {
                     (new Pairing(new ApiClient(), $link))->reportInstallation($idShop);
+                }
+                if ($changes) {
+                    (new Knowledge(new ApiClient(), $link))->sendPending($idShop);
                 }
                 if ($knowledge) {
                     (new Knowledge(new ApiClient(), $link))->run($idShop, Knowledge::STOREFRONT_BUDGET);
                 }
             } catch (Exception $exception) {
                 // The next report is due in an hour; the chat works either way.
+            }
+        });
+    }
+
+    /**
+     * How this server ends a response early, so that what follows it never delays the page; null
+     * where it cannot.
+     */
+    private static function finisher(): ?callable
+    {
+        if (function_exists('fastcgi_finish_request')) {
+            return static function (): void {
+                fastcgi_finish_request();
+            };
+        }
+        if (function_exists('litespeed_finish_request')) {
+            return static function (): void {
+                litespeed_finish_request();
+            };
+        }
+
+        return null;
+    }
+
+    /** @param mixed $product */
+    private function productChanged($product): void
+    {
+        if ($product instanceof Product) {
+            $this->noteProduct((int) $product->id);
+        }
+    }
+
+    /**
+     * A combination or a specific price changed: its product, or every product for a specific price
+     * of the whole catalog.
+     *
+     * @param mixed $part
+     */
+    private function partChanged($part): void
+    {
+        if (!$part instanceof Combination && !$part instanceof SpecificPrice) {
+            return;
+        }
+        if ((int) $part->id_product > 0) {
+            $this->noteProduct((int) $part->id_product);
+        } elseif ($part instanceof SpecificPrice) {
+            Knowledge::noteCatalog();
+        }
+    }
+
+    /**
+     * Notes the product and, once per request, sends what changed after the response is out
+     * (api-contract.md §7.6), in every connected shop. Where a response cannot be finished early,
+     * the next storefront page sends it.
+     */
+    private function noteProduct(int $idProduct): void
+    {
+        Knowledge::noteProduct($idProduct);
+        if (self::$changesQueued) {
+            return;
+        }
+        $finish = self::finisher();
+        if ($finish === null) {
+            return;
+        }
+        self::$changesQueued = true;
+        $link = $this->context->link;
+        register_shutdown_function(static function () use ($finish, $link): void {
+            $finish();
+            try {
+                $knowledge = new Knowledge(new ApiClient(), $link);
+                foreach (Settings::connectedShopIds() as $idShop) {
+                    $knowledge->sendPending($idShop);
+                }
+            } catch (Exception $exception) {
+                // The next pass sends what changed.
             }
         });
     }

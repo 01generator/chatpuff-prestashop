@@ -26,13 +26,20 @@ if (!defined('_PS_VERSION_')) {
  * knowledge (api-contract.md §7.6, capability knowledge_sync). A pass walks each kind in order,
  * language by language, within a time budget, and continues at the next run until it is complete;
  * only sources whose title or text changed since they were last sent travel, and each kind ends
- * with the inventory of what is published. Nothing about customers is ever sent.
+ * with the inventory of what is published. Nothing about customers is ever sent. A product that
+ * changes in the shop does not wait for the next pass (0.12.4): it is noted (noteProduct()) and sent
+ * on its own once the response of the request that changed it is out, or of the next storefront
+ * page (sendPending()).
  */
 final class Knowledge
 {
     public const TABLE = 'chatpuff_knowledge';
     public const CURSOR = 'CHATPUFF_KNOWLEDGE_CURSOR';
     public const CLAIMED_AT = 'CHATPUFF_KNOWLEDGE_AT';
+    /** The products changed since they were last sent, by shop, waiting for a response to finish (0.12.4). */
+    public const PENDING = 'CHATPUFF_KNOWLEDGE_PENDING';
+    /** More changed products than this in one go (an import, a bulk action) start the whole pass instead. */
+    public const PENDING_MAX = 100;
     /** Seconds between runs: hourly once a pass is complete, five minutes while one is in progress. */
     public const INTERVAL_COMPLETE = 3600;
     public const INTERVAL_IN_PROGRESS = 300;
@@ -47,6 +54,9 @@ final class Knowledge
     /** Identifiers an inventory may list (the contract's limit); a larger kind keeps what ChatPuff has. */
     private const MAX_INVENTORY = 100000;
     private const MAX_TEXT = 60000;
+
+    /** @var array<int, true> the shops whose noted products overflowed in this request: the pass takes them */
+    private static $overflowed = [];
 
     /** @var ApiClient */
     private $api;
@@ -89,6 +99,125 @@ final class Knowledge
         \Configuration::updateValue(self::CLAIMED_AT, $now, false, (int) \Shop::getGroupFromShop($idShop, true), $idShop);
 
         return true;
+    }
+
+    /**
+     * A product changed: saved, created or deleted, its stock, its combinations or a price of its
+     * own. Noted for every connected shop, to be sent once a response is out; nothing leaves the
+     * shop here, so a save stays as fast as ever whatever ChatPuff does. More than PENDING_MAX at
+     * once (an import, a bulk action) start the whole pass at the next storefront page instead,
+     * which sends only what changed.
+     */
+    public static function noteProduct(int $idProduct): void
+    {
+        if ($idProduct <= 0) {
+            return;
+        }
+        foreach (Settings::connectedShopIds() as $idShop) {
+            if (isset(self::$overflowed[$idShop])) {
+                continue;
+            }
+            $pending = self::pending($idShop);
+            if (in_array($idProduct, $pending, true)) {
+                continue;
+            }
+            $pending[] = $idProduct;
+            if (count($pending) > self::PENDING_MAX) {
+                self::$overflowed[$idShop] = true;
+                $pending = [];
+                self::touch($idShop, 0);
+            }
+            self::savePending($idShop, $pending);
+        }
+    }
+
+    /** A change to every product at once (a price for the whole catalog): the whole pass at the next storefront page. */
+    public static function noteCatalog(): void
+    {
+        foreach (Settings::connectedShopIds() as $idShop) {
+            self::$overflowed[$idShop] = true;
+            self::savePending($idShop, []);
+            self::touch($idShop, 0);
+        }
+    }
+
+    public static function hasPending(int $idShop): bool
+    {
+        return self::pending($idShop) !== [];
+    }
+
+    /**
+     * Sends the products noted since (noteProduct()): those that changed as sources, and, when one
+     * that ChatPuff has is no longer published (deleted, disabled, hidden), the products' inventory
+     * in that language, so that it leaves the assistant's knowledge at once. The list is cleared first, so
+     * another request finds nothing to send; when ChatPuff fails, nothing is remembered as sent and
+     * the next pass sends it.
+     */
+    public function sendPending(int $idShop): void
+    {
+        $pending = self::pending($idShop);
+        if ($pending === []) {
+            return;
+        }
+        self::savePending($idShop, []);
+        if (Settings::connection($idShop) === null) {
+            return;
+        }
+        [$from, $id] = self::published($idShop, 'product');
+        $rows = \Db::getInstance()->executeS('SELECT ' . $id . ' AS id ' . $from . ' AND ' . $id . ' IN (' . implode(',', $pending) . ') ORDER BY ' . $id . ' ASC');
+        $published = is_array($rows) ? array_map(static function (array $row): int {
+            return (int) $row['id'];
+        }, $rows) : [];
+        $gone = array_values(array_diff($pending, $published));
+        $pairing = new Pairing($this->api, $this->link);
+        try {
+            foreach ($this->languages($idShop) as $language) {
+                foreach (array_chunk($published, self::PAGE) as $ids) {
+                    $changed = $this->changed($idShop, 'product', $language['locale'], $this->sources($idShop, 'product', $ids, $language));
+                    if ($changed !== []) {
+                        $pairing->send($idShop, 'PUT', '/integration/v1/knowledge/sources', ['sources' => array_map(static function (array $source): array {
+                            unset($source['hash']);
+
+                            return $source;
+                        }, $changed)]);
+                        $this->remember($idShop, 'product', $language['locale'], $changed);
+                    }
+                }
+                if ($gone !== [] && $this->known($idShop, 'product', $language['locale'], $gone)) {
+                    $all = $this->ids($idShop, 'product', 0, true);
+                    if (count($all) <= self::MAX_INVENTORY) {
+                        $pairing->send($idShop, 'PUT', '/integration/v1/knowledge/inventory', ['kind' => 'product', 'locale' => $language['locale'], 'external_ids' => array_map('strval', $all)]);
+                        $this->forgetMissing($idShop, 'product', $language['locale'], $all);
+                    }
+                }
+            }
+        } catch (ApiException $exception) {
+            // The next pass sends them: nothing was remembered as sent.
+        }
+    }
+
+    /**
+     * @return list<int> the products noted for the shop
+     */
+    private static function pending(int $idShop): array
+    {
+        $raw = \Configuration::get(self::PENDING, null, null, $idShop);
+        $ids = is_string($raw) && $raw !== '' ? json_decode($raw, true) : null;
+        if (!is_array($ids)) {
+            return [];
+        }
+
+        return array_values(array_filter(array_map('intval', $ids), static function (int $id): bool {
+            return $id > 0;
+        }));
+    }
+
+    /**
+     * @param list<int> $ids
+     */
+    private static function savePending(int $idShop, array $ids): void
+    {
+        \Configuration::updateValue(self::PENDING, $ids === [] ? '' : (string) json_encode($ids), false, (int) \Shop::getGroupFromShop($idShop, true), $idShop);
     }
 
     /** Keeps the background runs away for a while: the page's own steps are running. */
@@ -419,6 +548,20 @@ final class Knowledge
             $values[] = '(' . $idShop . ", '" . pSQL($kind) . "', '" . pSQL($locale) . "', '" . pSQL($source['external_id']) . "', '" . pSQL($source['hash']) . "', NOW())";
         }
         \Db::getInstance()->execute('REPLACE INTO `' . _DB_PREFIX_ . self::TABLE . '` (id_shop, kind, locale, external_id, content_hash, sent_at) VALUES ' . implode(',', $values));
+    }
+
+    /**
+     * Whether any of these items was sent in this language and not forgotten since.
+     *
+     * @param list<int> $ids
+     */
+    private function known(int $idShop, string $kind, string $locale, array $ids): bool
+    {
+        return (bool) \Db::getInstance()->getValue(
+            'SELECT 1 FROM `' . _DB_PREFIX_ . self::TABLE . '`'
+            . ' WHERE id_shop = ' . $idShop . " AND kind = '" . pSQL($kind) . "' AND locale = '" . pSQL($locale) . "'"
+            . " AND external_id IN ('" . implode("','", array_map('intval', $ids)) . "')"
+        );
     }
 
     /**
